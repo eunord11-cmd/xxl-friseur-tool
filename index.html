@@ -3,100 +3,156 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>eBay Generator + Google Sheets – XXL Friseur Shop</title>
+<title>XXL Friseur Shop – Pro Tool</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg:#0a0a0a;--sf:#141414;--sf2:#1e1e1e;--gold:#c9a84c;--gold2:#e8d5a3;--brd:rgba(201,168,76,0.2);--txt:#fff;--mut:rgba(255,255,255,0.45);--grn:#4caf7d;--red:#e05252;--blu:#4c9af7;}
-body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:36px 20px;}
-.wrap{max-width:940px;margin:0 auto;}
-.header{text-align:center;margin-bottom:32px;}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:32px 16px;}
+.wrap{max-width:980px;margin:0 auto;}
+.header{text-align:center;margin-bottom:28px;}
 .badge{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);border:1px solid var(--brd);padding:4px 14px;margin-bottom:12px;text-transform:uppercase;}
-.header h1{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;line-height:1.15;margin-bottom:5px;}
+.header h1{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;line-height:1.2;margin-bottom:4px;}
 .header h1 span{color:var(--gold);}
-.header p{font-size:13px;color:var(--mut);}
-.tabs{display:flex;gap:2px;margin-bottom:18px;}
-.tab{flex:1;background:var(--sf2);border:1px solid var(--brd);padding:11px;text-align:center;cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);transition:all 0.2s;}
+.header p{font-size:12px;color:var(--mut);}
+.tabs{display:flex;gap:2px;margin-bottom:16px;flex-wrap:wrap;}
+.tab{flex:1;min-width:100px;background:var(--sf2);border:1px solid var(--brd);padding:10px 8px;text-align:center;cursor:pointer;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mut);transition:all 0.2s;}
 .tab.active{background:var(--gold);color:#0a0a0a;border-color:var(--gold);}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
-.card{background:var(--sf);border:1px solid var(--brd);padding:24px 28px;margin-bottom:16px;}
-.ct{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.card{background:var(--sf);border:1px solid var(--brd);padding:22px 24px;margin-bottom:14px;}
+.ct{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
 .ct::after{content:'';flex:1;height:1px;background:var(--brd);}
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;font-weight:500;}
-.inp{width:100%;background:var(--sf2);border:1px solid var(--brd);border-radius:2px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color 0.2s;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;}
+.inp{width:100%;background:var(--sf2);border:1px solid var(--brd);border-radius:2px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.2s;}
 .inp:focus{border-color:var(--gold);}
 .inp::placeholder{color:rgba(255,255,255,0.18);}
-textarea.inp{resize:vertical;min-height:68px;line-height:1.6;}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+textarea.inp{resize:vertical;min-height:65px;line-height:1.6;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
-.r4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:9px;}
+.r4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .chk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-.chk{background:var(--sf2);border:1px solid var(--brd);padding:8px 11px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:7px;}
+.chk{background:var(--sf2);border:1px solid var(--brd);padding:8px 10px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
 .chk:hover{border-color:var(--gold);}
 .chk.on{background:rgba(201,168,76,0.1);border-color:var(--gold);}
-.chk-dot{width:11px;height:11px;border:1px solid var(--brd);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;}
+.chk-dot{width:10px;height:10px;border:1px solid var(--brd);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:7px;}
 .chk.on .chk-dot{background:var(--gold);border-color:var(--gold);color:#000;}
-.chk-lbl{font-size:12px;}
-.btn{width:100%;border:none;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.chk-lbl{font-size:11px;}
+.btn{width:100%;border:none;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:12px;cursor:pointer;transition:all 0.2s;margin-top:4px;}
 .btn-gold{background:var(--gold);color:#0a0a0a;}
 .btn-gold:hover{background:var(--gold2);}
 .btn-gold:disabled{opacity:0.4;cursor:not-allowed;}
 .btn-grn{background:var(--grn);color:#fff;}
 .btn-grn:hover{background:#3d9e6b;}
 .btn-blu{background:var(--blu);color:#fff;}
-.btn-blu:hover{background:#3a88e0;}
 .btn-out{background:transparent;border:1px solid var(--brd);color:var(--gold2);}
 .btn-out:hover{background:var(--gold);color:#0a0a0a;border-color:var(--gold);}
 .btn-red{background:var(--red);color:#fff;}
-.status{display:none;align-items:center;gap:10px;padding:11px 15px;border-radius:2px;margin-top:10px;font-size:13px;}
+.status{display:none;align-items:center;gap:9px;padding:10px 14px;border-radius:2px;margin-top:9px;font-size:12px;}
 .status.show{display:flex;}
 .status.load{background:rgba(201,168,76,0.07);border:1px solid var(--brd);color:var(--gold2);}
 .status.err{background:rgba(224,82,82,0.07);border:1px solid rgba(224,82,82,0.3);color:var(--red);}
 .status.ok{background:rgba(76,175,125,0.07);border:1px solid rgba(76,175,125,0.3);color:var(--grn);}
-.spinner{width:14px;height:14px;border:2px solid var(--brd);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+.spinner{width:13px;height:13px;border:2px solid var(--brd);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.result-card{background:var(--sf);border:1px solid rgba(76,175,125,0.4);padding:24px 28px;margin-top:16px;display:none;}
-.rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px;}
-.rt{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--grn);}
-.cp-btn{background:var(--gold);color:#0a0a0a;border:none;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 15px;cursor:pointer;border-radius:2px;transition:all 0.2s;}
+
+/* FOTO UPLOAD */
+.upload-zone{border:2px dashed var(--brd);padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--sf2);border-radius:2px;position:relative;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gold);background:rgba(201,168,76,0.05);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:36px;margin-bottom:10px;}
+.upload-text{font-size:13px;color:var(--mut);}
+.upload-text strong{color:var(--gold2);}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:14px;}
+.photo-item{background:var(--sf2);border:1px solid var(--brd);border-radius:2px;overflow:hidden;position:relative;}
+.photo-item img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;}
+.photo-item-bar{padding:6px 8px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--brd);}
+.photo-num{font-family:'Space Mono',monospace;font-size:9px;color:var(--mut);}
+.photo-actions{display:flex;gap:4px;}
+.photo-btn{background:transparent;border:none;cursor:pointer;font-size:13px;padding:2px;}
+.photo-status{position:absolute;top:6px;right:6px;font-size:11px;background:rgba(0,0,0,0.7);padding:2px 6px;border-radius:10px;}
+.photo-status.uploading{color:var(--gold);}
+.photo-status.done{color:var(--grn);}
+.photo-status.error{color:var(--red);}
+.photo-url{font-size:9px;color:var(--mut);padding:4px 8px;word-break:break-all;border-top:1px solid var(--brd);background:var(--bg);}
+
+/* RESULT */
+.result-card{background:var(--sf);border:1px solid rgba(76,175,125,0.4);padding:22px 24px;margin-top:14px;display:none;}
+.rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+.rt{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--grn);}
+.cp-btn{background:var(--gold);color:#0a0a0a;border:none;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;cursor:pointer;border-radius:2px;transition:all 0.2s;}
 .cp-btn:hover{background:var(--gold2);}
 .cp-btn.copied{background:var(--grn);color:#fff;}
-.code-box{background:#0a0a0a;border:1px solid rgba(255,255,255,0.06);padding:13px;font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6;max-height:240px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;}
-/* SHEETS SETUP */
-.setup-steps{counter-reset:step;}
-.setup-step{counter-increment:step;display:grid;grid-template-columns:40px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
-.setup-step:last-child{border-bottom:none;}
-.step-n{width:36px;height:36px;background:var(--gold);color:#0a0a0a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;flex-shrink:0;}
-.step-body{}
-.step-title{font-size:14px;font-weight:600;margin-bottom:4px;}
-.step-desc{font-size:12px;color:var(--mut);line-height:1.6;}
-.step-code{background:var(--sf2);border:1px solid var(--brd);padding:8px 12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--gold2);margin-top:8px;word-break:break-all;}
+.code-box{background:#0a0a0a;border:1px solid rgba(255,255,255,0.06);padding:12px;font-family:'Space Mono',monospace;font-size:10px;color:rgba(255,255,255,0.55);line-height:1.6;max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;}
+
 /* LAGER */
-.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
-.info-box{background:var(--sf2);border:1px solid var(--brd);padding:14px 12px;text-align:center;}
-.info-num{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);line-height:1;}
-.info-lbl{font-size:10px;color:var(--mut);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
-.ltbl{width:100%;border-collapse:collapse;font-size:12px;}
-.ltbl th{background:var(--sf2);color:var(--gold);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:9px 11px;text-align:left;border-bottom:1px solid var(--brd);}
-.ltbl td{padding:9px 11px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px;}
+.info-box{background:var(--sf2);border:1px solid var(--brd);padding:12px;text-align:center;}
+.info-num{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);line-height:1;}
+.info-lbl{font-size:9px;color:var(--mut);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+.ltbl{width:100%;border-collapse:collapse;font-size:11px;}
+.ltbl th{background:var(--sf2);color:var(--gold);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--brd);}
+.ltbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
 .ltbl tr:hover td{background:rgba(255,255,255,0.02);}
-.bkat{font-size:10px;background:rgba(201,168,76,0.15);color:var(--gold);padding:2px 7px;border-radius:2px;}
+.bkat{font-size:9px;background:rgba(201,168,76,0.15);color:var(--gold);padding:2px 6px;border-radius:2px;}
 .sok{color:var(--grn);font-weight:600;}
 .slow{color:#f0a040;font-weight:600;}
 .sout{color:var(--red);font-weight:600;}
-.empty{text-align:center;padding:40px;color:var(--mut);}
-/* SHEETS CONNECTED */
-.sheets-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:2px;font-size:12px;margin-bottom:14px;}
-.sheets-connected{background:rgba(76,175,125,0.1);border:1px solid rgba(76,175,125,0.3);color:var(--grn);}
-.sheets-disconnected{background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.25);color:var(--red);}
+.empty{text-align:center;padding:36px;color:var(--mut);}
+.thumb-row{display:flex;gap:3px;}
+.thumb-row img{width:28px;height:28px;object-fit:cover;border-radius:2px;border:1px solid var(--brd);}
+
+/* SHEETS STATUS */
+.ss-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:2px;font-size:11px;margin-bottom:12px;}
+.ss-ok{background:rgba(76,175,125,0.08);border:1px solid rgba(76,175,125,0.3);color:var(--grn);}
+.ss-no{background:rgba(224,82,82,0.06);border:1px solid rgba(224,82,82,0.2);color:var(--red);}
+
+/* SETUP */
+.setup-step{display:grid;grid-template-columns:36px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.setup-step:last-child{border-bottom:none;}
+.sn{width:32px;height:32px;background:var(--gold);color:#0a0a0a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;flex-shrink:0;}
+.st{font-size:13px;font-weight:600;margin-bottom:3px;}
+.sd{font-size:11px;color:var(--mut);line-height:1.6;}
+
+/* KARTEN ANSICHT */
+.karten-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.karte{background:var(--sf);border:1px solid var(--brd);overflow:hidden;transition:border-color 0.2s;}
+.karte:hover{border-color:var(--gold);}
+.karte-img{width:100%;height:130px;object-fit:cover;display:block;background:var(--sf2);}
+.karte-img-placeholder{width:100%;height:130px;background:linear-gradient(135deg,var(--sf2),#1a1a1a);display:flex;align-items:center;justify-content:center;font-size:36px;}
+.karte-body{padding:12px 14px;}
+.karte-kat{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.karte-name{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.3;}
+.karte-desc{font-size:11px;color:var(--mut);margin-bottom:8px;line-height:1.4;}
+.karte-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--brd);padding-top:8px;}
+.karte-price{font-size:14px;font-weight:700;color:var(--gold);}
+.karte-stock{font-size:11px;font-weight:600;}
+.karte-actions{padding:8px 14px;border-top:1px solid var(--brd);display:flex;gap:6px;}
+/* WARNING BOX */
+.warn-item{background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.25);padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;border-radius:2px;}
+.warn-low{background:rgba(240,160,64,0.08);border-color:rgba(240,160,64,0.25);}
+.warn-text{font-size:12px;}
+.warn-badge{font-size:10px;padding:2px 8px;border-radius:2px;font-weight:600;}
+.nach-btn{background:var(--gold);color:#0a0a0a;border:none;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;border-radius:2px;font-family:'Space Mono',monospace;}
+/* PDF PREVIEW */
+.pdf-preview{background:#fff;color:#000;padding:32px;max-width:600px;margin:0 auto;font-family:Arial,sans-serif;}
+.pdf-header{background:#0f0f0f;color:#e8d5a3;padding:16px 24px;margin:-32px -32px 24px;display:flex;justify-content:space-between;align-items:center;}
+.pdf-title{font-size:20px;font-weight:700;letter-spacing:2px;}
+.pdf-product-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.pdf-product{border:1px solid #e2ddd6;padding:14px;}
+.pdf-product img{width:100%;height:120px;object-fit:cover;margin-bottom:8px;}
+.pdf-product-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.pdf-product-desc{font-size:11px;color:#666;line-height:1.5;}
+.pdf-product-price{font-size:14px;font-weight:700;color:#b8963e;margin-top:6px;}
+
 @media(max-width:600px){
   .r2,.r3,.r4{grid-template-columns:1fr;}
   .chk-grid{grid-template-columns:1fr 1fr;}
-  .tabs{flex-direction:column;}
   .info-grid{grid-template-columns:1fr 1fr;}
+  .photos-grid{grid-template-columns:repeat(2,1fr);}
 }
 </style>
 </head>
@@ -104,79 +160,231 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.6;}
 <div class="wrap">
 
 <div class="header">
-  <div class="badge">XXL Friseur Shop · Tools</div>
-  <h1>eBay Generator + <span>Google Sheets</span></h1>
-  <p>Artikel anlegen → HTML generieren → Lager in Google Sheets speichern → Excel exportieren</p>
+  <div class="badge">XXL Friseur Shop · Pro Tool</div>
+  <h1>All-in-One <span>Shop Manager</span></h1>
+  <p>Fotos hochladen · eBay & Amazon · PDF Katalog · Lagerverwaltung · Google Sheets</p>
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('gen')">⚡ Generator</div>
+  <div class="tab active" onclick="showTab('fotos')">📸 Fotos</div>
+  <div class="tab" onclick="showTab('gen')">⚡ Generator</div>
   <div class="tab" onclick="showTab('lager')">📦 Lager</div>
   <div class="tab" onclick="showTab('export')">📊 Export</div>
-  <div class="tab" onclick="showTab('setup')">⚙️ Einrichtung</div>
+  <div class="tab" onclick="showTab('setup')">⚙️ Setup</div>
+</div>
+
+<!-- ===== FOTOS ===== -->
+<div class="tab-content active" id="tab-fotos">
+<div class="card">
+  <div class="ct">Fotos hochladen</div>
+  <p style="font-size:12px;color:var(--mut);margin-bottom:14px;">Fotos hier hochladen → werden automatisch zu imgbb gespeichert → Links für eBay, Amazon & PDF verwendbar</p>
+
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
+    <div class="upload-icon">📸</div>
+    <div class="upload-text"><strong>Fotos hier reinziehen</strong> oder klicken zum Auswählen<br><span style="font-size:11px;">JPG, PNG, WEBP · Mehrere gleichzeitig möglich</span></div>
+  </div>
+
+  <div class="photos-grid" id="photosGrid"></div>
+
+  <div id="uploadStatus" class="status" style="margin-top:12px;"></div>
+</div>
+
+<div class="card" id="savedPhotosCard">
+  <div class="ct">Gespeicherte Fotos</div>
+  <div id="savedPhotosGrid" class="photos-grid"></div>
+  <div class="empty" id="noSavedPhotos">Noch keine Fotos hochgeladen.</div>
+</div>
 </div>
 
 <!-- ===== GENERATOR ===== -->
-<div class="tab-content active" id="tab-gen">
-
-<div id="sheetsStatusBar"></div>
-
+<div class="tab-content" id="tab-gen">
+<div id="ssBarGen"></div>
 <div class="card">
   <div class="ct">Produktinformationen</div>
 
-  <div class="field">
-    <label>Produktname *</label>
-    <input class="inp" id="pname" placeholder="z.B. Profi Halskrause Friseur 500 Blatt">
+<!-- IDENTIFIKATION -->
+  <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--brd);">◀ Identifikation</div>
+  <div class="r3">
+    <div class="field">
+      <label>Artikel-Nr. (SKU)</label>
+      <input class="inp" id="psku" placeholder="z.B. BBC-0001 (auto)">
+    </div>
+    <div class="field">
+      <label>EAN / Barcode</label>
+      <input class="inp" id="pean" placeholder="z.B. 4260123456789">
+    </div>
+    <div class="field">
+      <label>Einheit</label>
+      <select class="inp" id="peinheit">
+        <option>Stück</option><option>kg</option><option>g</option>
+        <option>l</option><option>ml</option><option>Packung</option>
+        <option>Karton</option><option>Flasche</option><option>Dose</option>
+      </select>
+    </div>
   </div>
-  <div class="r2">
+  <div class="r3">
+    <div class="field">
+      <label>Hersteller</label>
+      <input class="inp" id="phersteller" placeholder="z.B. BBcos Italy">
+    </div>
+    <div class="field">
+      <label>Marke</label>
+      <input class="inp" id="pmarke" placeholder="z.B. BBcos">
+    </div>
+    <div class="field">
+      <label>Lieferant</label>
+      <input class="inp" id="plieferant" placeholder="z.B. BBcos Club">
+    </div>
+  </div>
+
+  <!-- BESCHREIBUNG -->
+  <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--brd);">◀ Beschreibung</div>
+  <div class="field">
+    <label>Artikelname *</label>
+    <input class="inp" id="pname" placeholder="z.B. Emphasis Glow Serum">
+  </div>
+  <div class="r3">
     <div class="field">
       <label>Kategorie</label>
       <select class="inp" id="pkat">
-        <option>Friseurbedarf</option><option>Barbershop</option>
-        <option>Salon Zubehör</option><option>Haarpflege</option><option>Hygiene</option>
+        <option>Color Chart</option><option>Dauerwelle</option><option>Emphasis</option>
+        <option>Farbentferner</option><option>Färbung</option><option>Green line</option>
+        <option>Kristal</option><option>Meristema</option><option>New Fix</option>
+        <option>Revival</option><option>Shampoo</option><option>Conditioner</option>
+        <option>Styling</option><option>Behandlung</option><option>Friseurbedarf</option>
+        <option>Barbershop</option><option>Hygiene</option><option>Sonstiges</option>
       </select>
+    </div>
+    <div class="field">
+      <label>Produktlinie</label>
+      <input class="inp" id="pproduktlinie" placeholder="z.B. Emphasis">
     </div>
     <div class="field">
       <label>Farben / Varianten</label>
       <input class="inp" id="pfarben" placeholder="z.B. Silber & Gold">
     </div>
   </div>
+
+  <!-- PREISE -->
+  <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--brd);">◀ Preise & Steuern</div>
   <div class="r3">
     <div class="field">
-      <label>Einkaufspreis (€)</label>
+      <label>💰 EK-Preis (€)</label>
       <input class="inp" type="number" id="pek" placeholder="0.00" step="0.01">
     </div>
     <div class="field">
-      <label>Verkaufspreis (€)</label>
-      <input class="inp" type="number" id="pvk" placeholder="0.00" step="0.01">
+      <label>🏪 VK Hamburg (€)</label>
+      <input class="inp" type="number" id="pvk_hh" placeholder="0.00" step="0.01">
     </div>
     <div class="field">
-      <label>Anfangsbestand</label>
-      <input class="inp" type="number" id="pbestand" placeholder="0">
+      <label>🌐 VK Online (€)</label>
+      <input class="inp" type="number" id="pvk" placeholder="0.00" step="0.01">
+    </div>
+  </div>
+  <div class="r3">
+    <div class="field">
+      <label>MwSt. (%)</label>
+      <select class="inp" id="pmwst">
+        <option value="19">19%</option>
+        <option value="7">7%</option>
+        <option value="0">0%</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Marge Online</label>
+      <div style="background:var(--sf2);border:1px solid var(--brd);padding:9px 12px;font-size:12px;color:var(--gold2);border-radius:2px;" id="margeAnzeige">— %</div>
+    </div>
+    <div class="field">
+      <label>Onlineshop-Preis (€)</label>
+      <input class="inp" type="number" id="pshopprice" placeholder="0.00" step="0.01">
+    </div>
+  </div>
+
+  <!-- LAGER -->
+  <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--brd);">◀ Lager</div>
+  <div class="r3">
+    <div class="field">
+      <label>Lagerbereich</label>
+      <select class="inp" id="plagerbereich">
+        <option value="">— wählen —</option>
+        <option>Lager A</option><option>Lager B</option><option>Lager C</option>
+        <option>Außenlager</option><option>Sonderlager</option><option>Kühllager</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Lagerort</label>
+      <input class="inp" id="plagerort" placeholder="z.B. Regal 3, Fach 2">
+    </div>
+    <div class="field">
+      <label>Mindestbestand</label>
+      <input class="inp" type="number" id="pminbestand" placeholder="5">
     </div>
   </div>
   <div class="r2">
     <div class="field">
-      <label>Artikelnummer (SKU)</label>
-      <input class="inp" id="psku" placeholder="Wird automatisch vergeben">
+      <label>Aktueller Bestand</label>
+      <input class="inp" type="number" id="pbestand" placeholder="0">
     </div>
     <div class="field">
-      <label>Mindestbestand (Warnung bei)</label>
-      <input class="inp" type="number" id="pminbestand" placeholder="5">
+      <label>Bild-Dateiname</label>
+      <input class="inp" id="pbildname" placeholder="z.B. emphasis-glow-serum.jpg">
     </div>
+  </div>
+
+  <!-- ONLINESHOP -->
+  <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--brd);">◀ Onlineshop & Plattformen</div>
+  <div class="r2">
+    <div class="field">
+      <label>Online aktiv</label>
+      <select class="inp" id="ponlineaktiv">
+        <option value="Nein">Nein</option>
+        <option value="Ja">Ja</option>
+        <option value="Entwurf">Entwurf</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Onlineshop-URL</label>
+      <input class="inp" id="pshopurl" placeholder="https://...">
+    </div>
+  </div>
+  <div class="field">
+    <label>Plattformen</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="platGrid">
+      <div class="chk on" onclick="toggleChk(this)"><div class="chk-dot">✓</div><span class="chk-lbl">eBay</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Amazon</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Webshop</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">PDF</span></div>
+    </div>
+  </div>
+
+  <!-- NOTIZEN -->
+  <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--brd);">◀ Sonstiges</div>
+  <div class="field">
+    <label>Notizen</label>
+    <textarea class="inp" id="pnotizen" placeholder="Interne Notizen..." style="min-height:50px;"></textarea>
   </div>
   <div class="field">
     <label>Kurzbeschreibung *</label>
     <textarea class="inp" id="pbeschreibung" placeholder="z.B. Professionelle Einweg-Halskrause für Friseure..."></textarea>
   </div>
   <div class="field">
-    <label>Technische Details (je Zeile ein Detail)</label>
-    <textarea class="inp" id="pdetails" placeholder="Inhalt: 5 Rollen · 500 Blatt&#10;Material: Krepppapier&#10;Farbe: Weiß"></textarea>
+    <label>Technische Details (je Zeile)</label>
+    <textarea class="inp" id="pdetails" placeholder="Inhalt: 5 Rollen · 500 Blatt&#10;Material: Krepppapier"></textarea>
   </div>
   <div class="field">
     <label>Produktvorteile (je Zeile)</label>
-    <textarea class="inp" id="pvorteile" placeholder="Nassfest & hochdehnbar&#10;Selbstklebend – sitzt sicher"></textarea>
+    <textarea class="inp" id="pvorteile" placeholder="Nassfest & hochdehnbar&#10;Selbstklebend"></textarea>
   </div>
+
+  <!-- FOTO AUSWAHL -->
+  <div class="field">
+    <label>📸 Produktfotos auswählen</label>
+    <p style="font-size:11px;color:var(--mut);margin-bottom:8px;">Fotos die du im Fotos-Tab hochgeladen hast erscheinen hier</p>
+    <div id="fotoAuswahl" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;"></div>
+    <p id="noFotosMsg" style="font-size:11px;color:var(--mut);">Erst im 📸 Fotos Tab hochladen!</p>
+  </div>
+
   <div class="field">
     <label>Einsatzgebiete</label>
     <div class="chk-grid" id="einsatzGrid">
@@ -188,29 +396,21 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.6;}
       <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Rasur</span></div>
     </div>
   </div>
+
   <div class="field">
-    <label>Plattformen</label>
-    <div class="r4">
-      <div class="chk on" onclick="toggleChk(this)"><div class="chk-dot">✓</div><span class="chk-lbl">eBay</span></div>
-      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Amazon</span></div>
-      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Etsy</span></div>
-      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Webshop</span></div>
-    </div>
-  </div>
-  <div class="field">
-    <label>🛍️ Weitere eBay-Artikel verlinken (optional)</label>
+    <label>🛍️ Weitere eBay-Artikel verlinken</label>
     <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
       <div class="r2">
-        <input class="inp" id="a1n" placeholder="Artikel 1 Name" style="font-size:12px;padding:8px 11px;">
-        <input class="inp" id="a1l" placeholder="https://www.ebay.de/itm/..." style="font-size:12px;padding:8px 11px;">
+        <input class="inp" id="a1n" placeholder="Artikel 1 Name" style="font-size:11px;padding:7px 10px;">
+        <input class="inp" id="a1l" placeholder="https://www.ebay.de/itm/..." style="font-size:11px;padding:7px 10px;">
       </div>
       <div class="r2">
-        <input class="inp" id="a2n" placeholder="Artikel 2 Name" style="font-size:12px;padding:8px 11px;">
-        <input class="inp" id="a2l" placeholder="https://www.ebay.de/itm/..." style="font-size:12px;padding:8px 11px;">
+        <input class="inp" id="a2n" placeholder="Artikel 2 Name" style="font-size:11px;padding:7px 10px;">
+        <input class="inp" id="a2l" placeholder="https://www.ebay.de/itm/..." style="font-size:11px;padding:7px 10px;">
       </div>
       <div class="r2">
-        <input class="inp" id="a3n" placeholder="Artikel 3 Name" style="font-size:12px;padding:8px 11px;">
-        <input class="inp" id="a3l" placeholder="https://www.ebay.de/itm/..." style="font-size:12px;padding:8px 11px;">
+        <input class="inp" id="a3n" placeholder="Artikel 3 Name" style="font-size:11px;padding:7px 10px;">
+        <input class="inp" id="a3l" placeholder="https://www.ebay.de/itm/..." style="font-size:11px;padding:7px 10px;">
       </div>
     </div>
   </div>
@@ -228,62 +428,136 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.6;}
     <button class="cp-btn" id="cpBtn" onclick="copyCode()">📋 Kopieren</button>
   </div>
   <div class="code-box" id="codeBox"></div>
-  <div class="r2" style="margin-top:9px;">
-    <button class="btn btn-out" onclick="dlHTML()">⬇ HTML herunterladen</button>
-    <button class="btn btn-grn" onclick="showTab('lager')">📦 Zum Lager →</button>
+  <div class="r3" style="margin-top:8px;">
+    <button class="btn btn-out" onclick="dlHTML()">⬇ HTML</button>
+    <button class="btn btn-grn" onclick="showTab('lager')">📦 Lager</button>
+    <button class="btn btn-blu" onclick="genAmazon()">📦 Amazon Text</button>
   </div>
+</div>
+
+<div class="result-card" id="amazonCard" style="border-color:rgba(76,125,175,0.4);">
+  <div class="rh">
+    <span class="rt" style="color:var(--blu);">📦 Amazon Listing</span>
+    <button class="cp-btn" onclick="cpAmazon()" style="background:var(--blu);">📋 Kopieren</button>
+  </div>
+  <div class="code-box" id="amazonBox"></div>
 </div>
 </div>
 
 <!-- ===== LAGER ===== -->
 <div class="tab-content" id="tab-lager">
-<div class="card">
-  <div class="ct">Lagerübersicht</div>
-  <div id="sheetsStatusLager"></div>
-  <div class="info-grid">
-    <div class="info-box"><div class="info-num" id="lTotal">0</div><div class="info-lbl">Artikel</div></div>
-    <div class="info-box"><div class="info-num" id="lWert" style="font-size:16px;">0,00 €</div><div class="info-lbl">Lagerwert</div></div>
-    <div class="info-box"><div class="info-num" id="lLow" style="color:var(--red);">0</div><div class="info-lbl">Niedriger Bestand</div></div>
-    <div class="info-box"><div class="info-num" id="lPlat">0</div><div class="info-lbl">Plattformen</div></div>
-  </div>
-  <button class="btn btn-blu" style="margin-bottom:14px;" onclick="loadFromSheets()">🔄 Von Google Sheets laden</button>
-  <div id="lagerContainer"><div class="empty">📦 Noch keine Artikel. Gehe zum Generator!</div></div>
+
+<!-- STATS ROW -->
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px;" id="statsGrid">
+  <div class="info-box"><div class="info-num" id="lTotal">0</div><div class="info-lbl">Artikel gesamt</div></div>
+  <div class="info-box"><div class="info-num" id="lWert" style="font-size:13px;">0,00 €</div><div class="info-lbl">Lagerwert</div></div>
+  <div class="info-box"><div class="info-num" id="lLow" style="color:var(--red);">0</div><div class="info-lbl">⚠️ Niedriger Bestand</div></div>
+  <div class="info-box"><div class="info-num" id="lOut" style="color:var(--red);">0</div><div class="info-lbl">❌ Ausverkauft</div></div>
+  <div class="info-box"><div class="info-num" id="lFotos">0</div><div class="info-lbl">📸 Fotos</div></div>
 </div>
+
+<!-- DIAGRAMME -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+  <div class="card" style="padding:16px 18px;">
+    <div class="ct">Bestand nach Kategorie</div>
+    <canvas id="chartKat" height="160"></canvas>
+  </div>
+  <div class="card" style="padding:16px 18px;">
+    <div class="ct">Lagerwert nach Plattform</div>
+    <canvas id="chartPlat" height="160"></canvas>
+  </div>
+</div>
+
+<!-- WARNUNGEN -->
+<div id="warningBox" style="display:none;margin-bottom:14px;"></div>
+
+<!-- TOOLBAR -->
+<div class="card" style="padding:14px 18px;margin-bottom:10px;">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <input class="inp" id="lSearch" placeholder="🔍 Suchen..." style="flex:1;min-width:160px;padding:8px 12px;font-size:12px;" oninput="renderLager()">
+    <select class="inp" id="lFilterKat" style="width:140px;padding:8px 10px;font-size:12px;" onchange="renderLager()">
+      <option value="">Alle Kategorien</option>
+      <option>Friseurbedarf</option><option>Barbershop</option>
+      <option>Salon Zubehör</option><option>Haarpflege</option><option>Hygiene</option>
+    </select>
+    <select class="inp" id="lFilterPlat" style="width:130px;padding:8px 10px;font-size:12px;" onchange="renderLager()">
+      <option value="">Alle Plattformen</option>
+      <option>eBay</option><option>Amazon</option><option>Webshop</option><option>PDF</option>
+    </select>
+    <select class="inp" id="lFilterStock" style="width:130px;padding:8px 10px;font-size:12px;" onchange="renderLager()">
+      <option value="">Alle Bestände</option>
+      <option value="ok">✅ Auf Lager</option>
+      <option value="low">⚠️ Niedrig</option>
+      <option value="out">❌ Ausverkauft</option>
+    </select>
+    <select class="inp" id="lSort" style="width:150px;padding:8px 10px;font-size:12px;" onchange="renderLager()">
+      <option value="datum">Neueste zuerst</option>
+      <option value="name">Name A-Z</option>
+      <option value="bestand">Bestand</option>
+      <option value="wert">Lagerwert</option>
+      <option value="vk">Verkaufspreis</option>
+    </select>
+    <!-- Ansicht Toggle -->
+    <div style="display:flex;gap:2px;margin-left:auto;">
+      <button onclick="setView('table')" id="btnTable" style="background:var(--gold);color:#000;border:none;padding:8px 12px;cursor:pointer;font-size:14px;border-radius:2px 0 0 2px;">☰</button>
+      <button onclick="setView('cards')" id="btnCards" style="background:var(--sf2);color:var(--mut);border:1px solid var(--brd);padding:8px 12px;cursor:pointer;font-size:14px;border-radius:0 2px 2px 0;">⊞</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION BAR -->
+<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+  <div id="ssBarLager" style="flex:1;"></div>
+  <button class="btn btn-blu" style="width:auto;padding:8px 14px;margin:0;font-size:10px;" onclick="loadFromSheets()">🔄 Sheets laden</button>
+  <button class="btn btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:10px;" onclick="showTab('gen')">➕ Neuer Artikel</button>
+</div>
+
+<!-- LAGER CONTAINER -->
+<div id="lagerContainer"><div class="empty">📦 Noch keine Artikel. Generator benutzen!</div></div>
+
+<!-- NACHBESTELLUNG MODAL -->
+<div id="nachModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--sf);border:1px solid var(--brd);padding:28px;max-width:400px;width:90%;border-radius:2px;">
+    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">📦 Nachbestellung</div>
+    <p id="nachName" style="font-size:14px;font-weight:600;margin-bottom:12px;"></p>
+    <div class="field"><label>Menge nachbestellen</label><input class="inp" type="number" id="nachMenge" placeholder="z.B. 50"></div>
+    <div class="field"><label>Lieferant (optional)</label><input class="inp" id="nachLieferant" placeholder="z.B. Großhändler XY"></div>
+    <div class="field"><label>Notiz</label><input class="inp" id="nachNotiz" placeholder="z.B. Dringend!"></div>
+    <div class="r2" style="margin-top:12px;">
+      <button class="btn btn-gold" onclick="saveNachbestellung()">✓ Speichern</button>
+      <button class="btn btn-out" onclick="document.getElementById('nachModal').style.display='none'">✕ Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <!-- ===== EXPORT ===== -->
 <div class="tab-content" id="tab-export">
 <div class="card">
-  <div class="ct">Excel Export</div>
+  <div class="ct">Excel & PDF Export</div>
   <div class="info-grid">
     <div class="info-box"><div class="info-num" id="eTotal">0</div><div class="info-lbl">Artikel</div></div>
-    <div class="info-box"><div class="info-num" id="eWert" style="font-size:16px;">0,00 €</div><div class="info-lbl">Gesamtwert</div></div>
+    <div class="info-box"><div class="info-num" id="eWert" style="font-size:14px;">0,00 €</div><div class="info-lbl">Gesamtwert</div></div>
     <div class="info-box"><div class="info-num" id="ePlat">0</div><div class="info-lbl">Plattformen</div></div>
     <div class="info-box"><div class="info-num" id="eLow" style="color:var(--red);">0</div><div class="info-lbl">Niedriger Bestand</div></div>
   </div>
-  <div style="display:flex;flex-direction:column;gap:9px;">
+
+  <p style="font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Excel Export</p>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
     <button class="btn btn-grn" onclick="exportExcel('alle')">📊 Komplette Lagerliste</button>
     <button class="btn btn-blu" onclick="exportExcel('ebay')">🛒 Nur eBay-Artikel</button>
     <button class="btn btn-blu" onclick="exportExcel('amazon')">📦 Nur Amazon-Artikel</button>
     <button class="btn btn-out" onclick="exportExcel('low')">⚠️ Niedriger Bestand</button>
   </div>
-  <div style="margin-top:18px;padding:14px;background:var(--sf2);border:1px solid var(--brd);">
-    <p style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Excel Spalten:</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-      <span style="font-size:11px;color:var(--mut);">✓ SKU / Artikelnummer</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Produktname</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Kategorie</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Beschreibung</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Farben / Varianten</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Einkaufspreis</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Verkaufspreis</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Lagerbestand</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Lagerwert</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Plattformen</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Einsatzgebiete</span>
-      <span style="font-size:11px;color:var(--mut);">✓ Datum</span>
-    </div>
+
+  <p style="font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">PDF Katalog</p>
+  <div class="field">
+    <label>Katalog Titel</label>
+    <input class="inp" id="pdfTitle" placeholder="z.B. XXL Friseur Shop – Produktkatalog 2025">
   </div>
+  <button class="btn btn-red" onclick="generatePDF()">📄 PDF Katalog generieren</button>
+  <p style="font-size:10px;color:var(--mut);margin-top:8px;">Der Katalog öffnet sich in einem neuen Fenster — dann Strg+P zum Drucken/Speichern als PDF</p>
 </div>
 </div>
 
@@ -291,122 +565,230 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.6;}
 <div class="tab-content" id="tab-setup">
 <div class="card">
   <div class="ct">Google Sheets Einrichtung</div>
-  <p style="font-size:13px;color:var(--mut);margin-bottom:20px;line-height:1.7;">Einmalige Einrichtung — danach werden alle Artikel automatisch in Google Sheets gespeichert und sind von überall abrufbar.</p>
-
-  <div class="setup-steps">
-    <div class="setup-step">
-      <div class="step-n">1</div>
-      <div class="step-body">
-        <div class="step-title">Google Sheet erstellen</div>
-        <div class="step-desc">Gehe auf <strong>sheets.google.com</strong> → Neues leeres Sheet → Nenne es <strong>„XXL Friseur Lager"</strong></div>
+  <div class="setup-step">
+    <div class="sn">1</div>
+    <div><div class="st">Google Sheet erstellen</div><div class="sd">sheets.google.com → Neues Sheet → „XXL Friseur Lager"</div></div>
+  </div>
+  <div class="setup-step">
+    <div class="sn">2</div>
+    <div><div class="st">Apps Script öffnen</div><div class="sd">Erweiterungen → Apps Script → Code einfügen → Speichern</div></div>
+  </div>
+  <div class="setup-step">
+    <div class="sn">3</div>
+    <div><div class="st">Web-App bereitstellen</div><div class="sd">Bereitstellen → Neue Bereitstellung → Web-App → Zugriff: Jeder → URL kopieren</div></div>
+  </div>
+  <div class="setup-step">
+    <div class="sn">4</div>
+    <div>
+      <div class="st">URL hier eintragen</div>
+      <div class="sd">Die Web-App URL einfügen → Verbinden klicken → Fertig!</div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input class="inp" id="sheetsUrl" placeholder="https://script.google.com/macros/s/..." style="flex:1;">
+        <button class="btn btn-grn" style="width:auto;padding:9px 16px;margin:0;" onclick="saveUrl()">✓ Verbinden</button>
       </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-n">2</div>
-      <div class="step-body">
-        <div class="step-title">Apps Script öffnen</div>
-        <div class="step-desc">Im Sheet: <strong>Erweiterungen → Apps Script</strong> → Das Script-Fenster öffnet sich</div>
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-n">3</div>
-      <div class="step-body">
-        <div class="step-title">Script einfügen</div>
-        <div class="step-desc">Den gesamten Inhalt der Datei <strong>google_apps_script.js</strong> in das Script-Fenster kopieren → Alten Code löschen → Speichern (💾)</div>
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-n">4</div>
-      <div class="step-body">
-        <div class="step-title">Web-App veröffentlichen</div>
-        <div class="step-desc">
-          1. Oben rechts: <strong>Bereitstellen → Neue Bereitstellung</strong><br>
-          2. Typ: <strong>Web-App</strong><br>
-          3. Ausführen als: <strong>Ich (deine E-Mail)</strong><br>
-          4. Zugriff: <strong>Jeder</strong><br>
-          5. <strong>Bereitstellen</strong> → Berechtigung erteilen → URL kopieren
-        </div>
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-n">5</div>
-      <div class="step-body">
-        <div class="step-title">URL hier eintragen</div>
-        <div class="step-desc">Die Web-App URL unten einfügen → Verbinden klicken → Fertig!</div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <input class="inp" id="sheetsUrl" placeholder="https://script.google.com/macros/s/..." style="flex:1;">
-          <button class="btn btn-grn" style="width:auto;padding:10px 18px;margin:0;" onclick="saveUrl()">✓ Verbinden</button>
-        </div>
-        <div class="status" id="setupStatus"><div class="spinner"></div><span id="setupStatusTxt"></span></div>
-      </div>
+      <div class="status" id="setupStatus"><div class="spinner"></div><span id="setupStatusTxt"></span></div>
     </div>
   </div>
 </div>
 </div>
 
-</div>
+</div><!-- end wrap -->
+
 <script>
-// STATE
-let artikel = [];
+const IMGBB_KEY = 'ffd56b76c53b91c7d891d1c2d12c3331';
+let artikel = JSON.parse(localStorage.getItem('xxl_artikel')||'[]');
+let savedPhotos = JSON.parse(localStorage.getItem('xxl_photos')||'[]');
 let skuN = parseInt(localStorage.getItem('xxl_sku')||'1');
 let sheetsUrl = localStorage.getItem('xxl_sheets_url')||'';
+let selectedPhotos = [];
+let generatedHTML = '';
+let generatedAmazon = '';
 
-// INIT
+// Live Marge Berechnung
+function calcMarge() {
+  const ek = parseFloat(document.getElementById('pek')?.value)||0;
+  const vk = parseFloat(document.getElementById('pvk')?.value)||0;
+  const el = document.getElementById('margeAnzeige');
+  if(!el) return;
+  if(ek>0 && vk>0) {
+    const marge = ((vk-ek)/vk*100);
+    const gewinn = vk-ek;
+    el.textContent = marge.toFixed(1)+'% ('+gewinn.toFixed(2).replace('.',',')+'€ Gewinn)';
+    el.style.color = marge>30?'var(--grn)':marge>15?'var(--gold2)':'var(--red)';
+  } else {
+    el.textContent = '— %';
+    el.style.color = 'var(--gold2)';
+  }
+}
+
 window.onload = () => {
+  document.addEventListener('input', e=>{
+    if(e.target.id==='pek'||e.target.id==='pvk') calcMarge();
+  });
   if(sheetsUrl) document.getElementById('sheetsUrl').value = sheetsUrl;
   updateStatusBars();
-  artikel = JSON.parse(localStorage.getItem('xxl_artikel')||'[]');
+  renderSavedPhotos();
+  renderFotoAuswahl();
   renderLager();
   updateExportStats();
 };
 
+// ===== TABS =====
 function showTab(id) {
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  ['gen','lager','export','setup'].forEach((t,i)=>{ if(t===id) document.querySelectorAll('.tab')[i].classList.add('active'); });
+  ['fotos','gen','lager','export','setup'].forEach((t,i)=>{
+    if(t===id) document.querySelectorAll('.tab')[i].classList.add('active');
+  });
+  if(id==='gen') renderFotoAuswahl();
   if(id==='lager'){renderLager();updateExportStats();}
   if(id==='export') updateExportStats();
   updateStatusBars();
 }
 
+// ===== STATUS BARS =====
 function updateStatusBars() {
   const html = sheetsUrl
-    ? `<div class="sheets-status sheets-connected">✅ Google Sheets verbunden — Daten werden automatisch gespeichert</div>`
-    : `<div class="sheets-status sheets-disconnected">⚠️ Google Sheets nicht verbunden — Gehe zu ⚙️ Einrichtung → URL eintragen</div>`;
-  ['sheetsStatusBar','sheetsStatusLager'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
+    ? `<div class="ss-bar ss-ok">✅ Google Sheets verbunden</div>`
+    : `<div class="ss-bar ss-no">⚠️ Google Sheets nicht verbunden — ⚙️ Setup</div>`;
+  ['ssBarGen','ssBarLager'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
 }
 
-// CHECKBOXES
+// ===== CHECKBOXES =====
 function toggleChk(el){el.classList.toggle('on');el.querySelector('.chk-dot').textContent=el.classList.contains('on')?'✓':'';}
 function getChk(gridId){return Array.from(document.querySelectorAll('#'+gridId+' .chk.on')).map(i=>i.querySelector('.chk-lbl').textContent);}
 
-// STATUS
+// ===== FOTO UPLOAD =====
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e=>{e.preventDefault();uploadZone.classList.add('drag');});
+uploadZone.addEventListener('dragleave', ()=>uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e=>{e.preventDefault();uploadZone.classList.remove('drag');handleFiles(e.dataTransfer.files);});
+
+async function handleFiles(files) {
+  const grid = document.getElementById('photosGrid');
+  for(const file of files) {
+    if(!file.type.startsWith('image/')) continue;
+    const id = Date.now() + Math.random();
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const preview = e.target.result;
+      const div = document.createElement('div');
+      div.className = 'photo-item';
+      div.id = 'photo_'+id;
+      div.innerHTML = `
+        <img src="${preview}" alt="Foto">
+        <div class="photo-status uploading" id="ps_${id}">⏳ Upload...</div>
+        <div class="photo-item-bar">
+          <span class="photo-num">${file.name.substring(0,15)}</span>
+        </div>`;
+      grid.appendChild(div);
+
+      // Upload to imgbb
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST',body:formData});
+        const data = await res.json();
+        if(data.success) {
+          const url = data.data.url;
+          const thumb = data.data.thumb?.url || url;
+          document.getElementById('ps_'+id).textContent = '✅';
+          document.getElementById('ps_'+id).className = 'photo-status done';
+          div.querySelector('.photo-item-bar').innerHTML = `
+            <span class="photo-num">✅ Fertig</span>
+            <div class="photo-actions">
+              <button class="photo-btn" onclick="cpUrl('${url}')" title="URL kopieren">📋</button>
+              <button class="photo-btn" onclick="removePhoto('${url}')" title="Löschen">🗑️</button>
+            </div>`;
+          div.innerHTML += `<div class="photo-url">${url}</div>`;
+
+          // Save
+          const photo = {id:Date.now(),url,thumb,name:file.name,datum:new Date().toLocaleDateString('de-DE')};
+          savedPhotos.push(photo);
+          localStorage.setItem('xxl_photos',JSON.stringify(savedPhotos));
+          renderSavedPhotos();
+          renderFotoAuswahl();
+        } else throw new Error('Upload fehlgeschlagen');
+      } catch(err) {
+        document.getElementById('ps_'+id).textContent = '❌';
+        document.getElementById('ps_'+id).className = 'photo-status error';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function cpUrl(url) {
+  navigator.clipboard.writeText(url).then(()=>alert('URL kopiert: '+url));
+}
+
+function removePhoto(url) {
+  savedPhotos = savedPhotos.filter(p=>p.url!==url);
+  localStorage.setItem('xxl_photos',JSON.stringify(savedPhotos));
+  renderSavedPhotos();
+  renderFotoAuswahl();
+}
+
+function renderSavedPhotos() {
+  const grid = document.getElementById('savedPhotosGrid');
+  const empty = document.getElementById('noSavedPhotos');
+  document.getElementById('lFotos').textContent = savedPhotos.length;
+
+  if(!savedPhotos.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML = savedPhotos.map(p=>`
+    <div class="photo-item">
+      <img src="${p.thumb||p.url}" alt="${p.name}">
+      <div class="photo-item-bar">
+        <span class="photo-num">${p.name.substring(0,12)}</span>
+        <div class="photo-actions">
+          <button class="photo-btn" onclick="cpUrl('${p.url}')" title="URL kopieren">📋</button>
+          <button class="photo-btn" onclick="removePhoto('${p.url}')" title="Löschen">🗑️</button>
+        </div>
+      </div>
+      <div class="photo-url">${p.url.substring(0,35)}...</div>
+    </div>`).join('');
+}
+
+function renderFotoAuswahl() {
+  const grid = document.getElementById('fotoAuswahl');
+  const msg = document.getElementById('noFotosMsg');
+  if(!savedPhotos.length){grid.innerHTML='';msg.style.display='block';return;}
+  msg.style.display='none';
+  grid.innerHTML = savedPhotos.map((p,i)=>`
+    <div onclick="toggleFoto(${i},this)" style="cursor:pointer;position:relative;border:2px solid var(--brd);border-radius:2px;overflow:hidden;transition:border-color 0.2s;" id="fa_${i}">
+      <img src="${p.thumb||p.url}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;">
+      <div style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.6);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;" id="fac_${i}"></div>
+    </div>`).join('');
+}
+
+function toggleFoto(i, el) {
+  const idx = selectedPhotos.indexOf(i);
+  if(idx === -1) {
+    selectedPhotos.push(i);
+    el.style.borderColor = 'var(--gold)';
+    document.getElementById('fac_'+i).textContent = '✓';
+    document.getElementById('fac_'+i).style.background = 'var(--gold)';
+    document.getElementById('fac_'+i).style.color = '#000';
+  } else {
+    selectedPhotos.splice(idx,1);
+    el.style.borderColor = 'var(--brd)';
+    document.getElementById('fac_'+i).textContent = '';
+    document.getElementById('fac_'+i).style.background = 'rgba(0,0,0,0.6)';
+  }
+}
+
+// ===== STATUS =====
 function setStatus(id,show,text,type='load'){
   const el=document.getElementById(id);
   el.className='status'+(show?' show '+type:'');
-  el.querySelector('span').textContent=text||'';
+  const span=el.querySelector('span');
+  if(span)span.textContent=text||'';
 }
 
-// SAVE URL
-async function saveUrl(){
-  const url=document.getElementById('sheetsUrl').value.trim();
-  if(!url){alert('Bitte URL eingeben!');return;}
-  setStatus('setupStatus',true,'Verbindung wird getestet...','load');
-  try{
-    const res=await fetch(url+'?action=stats');
-    const data=await res.json();
-    if(data.success){
-      sheetsUrl=url;
-      localStorage.setItem('xxl_sheets_url',url);
-      setStatus('setupStatus',true,'✅ Verbindung erfolgreich! Google Sheets ist verbunden.','ok');
-      updateStatusBars();
-    } else throw new Error(data.error||'Verbindung fehlgeschlagen');
-  }catch(e){setStatus('setupStatus',true,'❌ Fehler: '+e.message+' — Bitte URL prüfen','err');}
-}
-
-// GENERATE
-async function generateAll(){
+// ===== GENERATE =====
+async function generateAll() {
   const name=document.getElementById('pname').value.trim();
   const beschreibung=document.getElementById('pbeschreibung').value.trim();
   if(!name||!beschreibung){alert('Bitte Produktname und Beschreibung ausfüllen!');return;}
@@ -415,18 +797,39 @@ async function generateAll(){
   btn.disabled=true;
   setStatus('genStatus',true,'KI generiert HTML-Code...','load');
   document.getElementById('resultCard').style.display='none';
+  document.getElementById('amazonCard').style.display='none';
 
   const kat=document.getElementById('pkat').value;
   const farben=document.getElementById('pfarben').value.trim();
   const details=document.getElementById('pdetails').value.trim();
   const vorteile=document.getElementById('pvorteile').value.trim();
   const einsatz=getChk('einsatzGrid');
-  const plattformen=getChk('platGrid')||[];
+  const plattformen=getChk('platGrid');
   const ek=parseFloat(document.getElementById('pek').value)||0;
   const vk=parseFloat(document.getElementById('pvk').value)||0;
+  const vk_hh=parseFloat(document.getElementById('pvk_hh').value)||0;
   const bestand=parseInt(document.getElementById('pbestand').value)||0;
   let sku=document.getElementById('psku').value.trim()||('XXL-'+String(skuN++).padStart(3,'0'));
   localStorage.setItem('xxl_sku',skuN);
+  // Extra fields
+  const ean=document.getElementById('pean')?.value.trim()||'';
+  const hersteller=document.getElementById('phersteller')?.value.trim()||'';
+  const marke=document.getElementById('pmarke')?.value.trim()||'';
+  const lieferant=document.getElementById('plieferant')?.value.trim()||'';
+  const produktlinie=document.getElementById('pproduktlinie')?.value.trim()||'';
+  const einheit=document.getElementById('peinheit')?.value||'Stück';
+  const mwst=document.getElementById('pmwst')?.value||'19';
+  const shopprice=parseFloat(document.getElementById('pshopprice')?.value)||0;
+  const lagerbereich=document.getElementById('plagerbereich')?.value||'';
+  const lagerort=document.getElementById('plagerort')?.value.trim()||'';
+  const minbestand=parseInt(document.getElementById('pminbestand')?.value)||5;
+  const onlineaktiv=document.getElementById('ponlineaktiv')?.value||'Nein';
+  const shopurl=document.getElementById('pshopurl')?.value.trim()||'';
+  const bildname=document.getElementById('pbildname')?.value.trim()||'';
+  const notizen=document.getElementById('pnotizen')?.value.trim()||'';
+
+  // Ausgewählte Fotos
+  const fotoUrls = selectedPhotos.map(i=>savedPhotos[i]?.url).filter(Boolean);
 
   const weitere=[];
   ['1','2','3'].forEach(n=>{
@@ -435,16 +838,24 @@ async function generateAll(){
     if(an&&al) weitere.push(`- ${an}: ${al}`);
   });
 
-  const prompt=`Erstelle professionellen eBay-HTML-Code:
+  const fotoSection = fotoUrls.length
+    ? `\nProduktfotos (diese URLs in den HTML-Code einbauen):\n${fotoUrls.map((u,i)=>`Foto ${i+1}: ${u}`).join('\n')}`
+    : '\nKeine Fotos ausgewählt (keine img-Tags einbauen)';
+
+  const prompt = `Erstelle professionellen eBay-HTML-Code:
 Produkt: ${name} | Kategorie: ${kat}${farben?` | Farben: ${farben}`:''}
 Beschreibung: ${beschreibung}
 ${details?`Details:\n${details}`:''}
 ${vorteile?`Vorteile:\n${vorteile}`:''}
 ${einsatz.length?`Einsatz: ${einsatz.join(', ')}`:''}
+${fotoSection}
 ${weitere.length?`Weitere Artikel:\n${weitere.join('\n')}`:''}
-ANFORDERUNGEN: Nur HTML-Tabellen + inline CSS. Farben: #0f0f0f #b8963e #fdfcfa. Shop: "XXL Friseur Shop". Aufbau: Header→Hero→Vorteile(01-06)→Details→Einsatz→Versandinfo${weitere.length?'→Weitere Artikel Karten mit echten Links':''} →Footer. KEINE Bilder, KEIN Preis. Max 20000 Zeichen. Nur HTML, keine Erklärung.`;
 
-  try{
+ANFORDERUNGEN: Nur HTML-Tabellen + inline CSS. Farben: #0f0f0f #b8963e #fdfcfa. Shop: "XXL Friseur Shop". 
+${fotoUrls.length ? `Baue die Fotos als <img src="URL" width="280"> in Galerie-Sektion ein.` : 'Keine Bilder einbauen.'}
+Aufbau: Header→Hero→${fotoUrls.length?'Fotogalerie→':''}Vorteile(01-06)→Details→Einsatz→Versandinfo${weitere.length?'→Weitere Artikel':''} →Footer. KEIN Preis. Max 20000 Zeichen. Nur HTML, keine Erklärung.`;
+
+  try {
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})
@@ -453,114 +864,137 @@ ANFORDERUNGEN: Nur HTML-Tabellen + inline CSS. Farben: #0f0f0f #b8963e #fdfcfa. 
     let code=data.content?.[0]?.text||'';
     code=code.replace(/```html\n?/gi,'').replace(/```\n?/gi,'').trim();
     if(!code||code.length<100) throw new Error('Kein Code generiert');
+    generatedHTML = code;
 
     document.getElementById('codeBox').textContent=code;
     document.getElementById('resultCard').style.display='block';
     document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
 
-    // Artikel Objekt
+    // Artikel speichern
     const a={
-      id:Date.now(), sku, name, kategorie:kat, beschreibung, farben,
-      details, vorteile, einsatz:einsatz.join(', '),
+      id:Date.now(),sku,ean,hersteller,marke,lieferant,
+      name,kategorie:kat,produktlinie,einheit,farben,
+      details,vorteile,einsatz:einsatz.join(', '),
       plattformen:plattformen.join(', '),
-      ek, vk, bestand,
+      ek,vk,vk_hh,shopprice,mwst,
+      lagerbereich,lagerort,minbestand,bestand,
       lagerwert:(ek*bestand).toFixed(2),
+      onlineaktiv,shopurl,bildname,notizen,
       datum:new Date().toLocaleDateString('de-DE'),
-      html:code
+      fotos:fotoUrls, html:code
     };
-
-    // Lokal speichern
     artikel.push(a);
     localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
 
-    // In Google Sheets speichern
+    // Google Sheets
     if(sheetsUrl){
       setStatus('genStatus',true,'In Google Sheets speichern...','load');
       try{
-        await fetch(sheetsUrl,{
-          method:'POST',
-          body:JSON.stringify({action:'add',sku,name,kategorie:kat,beschreibung,farben,
-            einkauf:ek,verkauf:vk,bestand,lagerwert:a.lagerwert,
-            plattformen:plattformen.join(', '),einsatz:einsatz.join(', ')})
+        await fetch(sheetsUrl,{method:'POST',
+          body:JSON.stringify({action:'add',
+            sku,ean,hersteller,marke,lieferant,
+            name,kategorie:kat,produktlinie,einheit,
+            einkauf:ek,verkauf_hh:vk_hh,verkauf:vk,mwst,
+            marge:ek>0&&vk>0?Math.round((vk-ek)/vk*100):0,
+            lagerbereich,lagerort,minbestand,bestand,
+            lagerwert:a.lagerwert,onlineaktiv,shopprice,
+            bildname,shopurl,notizen,
+            plattformen:plattformen.join(', ')})
         });
-        setStatus('genStatus',true,'✅ HTML generiert + in Google Sheets gespeichert!','ok');
+        setStatus('genStatus',true,'✅ Fertig! HTML generiert + Google Sheets gespeichert','ok');
       }catch(e){
-        setStatus('genStatus',true,'✅ HTML generiert · ⚠️ Sheets-Fehler: '+e.message,'ok');
+        setStatus('genStatus',true,'✅ HTML fertig · ⚠️ Sheets-Fehler','ok');
       }
     } else {
-      setStatus('genStatus',true,'✅ HTML generiert + lokal gespeichert (Sheets nicht verbunden)','ok');
+      setStatus('genStatus',true,'✅ HTML generiert + lokal gespeichert','ok');
     }
 
   }catch(e){setStatus('genStatus',true,'❌ Fehler: '+e.message,'err');}
   btn.disabled=false;
 }
 
-// LOAD FROM SHEETS
-async function loadFromSheets(){
-  if(!sheetsUrl){alert('Google Sheets nicht verbunden! Gehe zu ⚙️ Einrichtung.');return;}
+// ===== AMAZON LISTING =====
+async function genAmazon() {
+  const name=document.getElementById('pname').value.trim();
+  if(!name){alert('Erst Produkt generieren!');return;}
+
+  const kat=document.getElementById('pkat').value;
+  const farben=document.getElementById('pfarben').value.trim();
+  const beschreibung=document.getElementById('pbeschreibung').value.trim();
+  const details=document.getElementById('pdetails').value.trim();
+  const vorteile=document.getElementById('pvorteile').value.trim();
+  const vk=parseFloat(document.getElementById('pvk').value)||0;
+  const vk_hh=parseFloat(document.getElementById('pvk_hh').value)||0;
+
+  const prompt=`Erstelle ein professionelles Amazon-Listing auf Deutsch für:
+Produkt: ${name} | Kategorie: ${kat}${farben?` | Farben: ${farben}`:''}
+Beschreibung: ${beschreibung}
+${details?`Details: ${details}`:''}
+${vorteile?`Vorteile: ${vorteile}`:''}
+${vk?`Preis: ${vk} €`:''}
+
+Format:
+TITEL: (max 200 Zeichen, SEO-optimiert)
+BULLETPOINTS:
+• (5 Bulletpoints, je max 200 Zeichen)
+BESCHREIBUNG: (max 2000 Zeichen)
+KEYWORDS: (Backend-Keywords, kommagetrennt)
+
+Nur den Text ausgeben, keine Erklärungen.`;
+
   try{
-    const res=await fetch(sheetsUrl+'?action=getAll');
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+    });
     const data=await res.json();
-    if(data.success && data.artikel){
-      // Merge mit lokalen HTML-Daten
-      data.artikel.forEach(sa=>{
-        const local=artikel.find(a=>a.sku===sa['Artikelnummer (SKU)']);
-        if(!local){
-          artikel.push({
-            sku:sa['Artikelnummer (SKU)'],name:sa['Produktname'],
-            kategorie:sa['Kategorie'],beschreibung:sa['Beschreibung'],
-            farben:sa['Farben / Varianten'],ek:sa['Einkaufspreis (€)'],
-            vk:sa['Verkaufspreis (€)'],bestand:sa['Lagerbestand (Stk)'],
-            lagerwert:sa['Lagerwert (€)'],plattformen:sa['Plattformen'],
-            einsatz:sa['Einsatzgebiete'],datum:sa['Datum hinzugefügt'],html:''
-          });
-        } else {
-          local.bestand=sa['Lagerbestand (Stk)'];
-          local.lagerwert=sa['Lagerwert (€)'];
-        }
-      });
-      localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
-      renderLager();
-      alert('✅ '+data.artikel.length+' Artikel von Google Sheets geladen!');
-    }
-  }catch(e){alert('Fehler beim Laden: '+e.message);}
+    generatedAmazon=data.content?.[0]?.text||'';
+    document.getElementById('amazonBox').textContent=generatedAmazon;
+    document.getElementById('amazonCard').style.display='block';
+    document.getElementById('amazonCard').scrollIntoView({behavior:'smooth'});
+  }catch(e){alert('Fehler: '+e.message);}
 }
 
-// RENDER LAGER
+function cpAmazon(){
+  navigator.clipboard.writeText(generatedAmazon).then(()=>alert('Amazon Listing kopiert!'));
+}
+
+// ===== LAGER =====
 function renderLager(){
   const total=artikel.length;
   const wert=artikel.reduce((s,a)=>s+(parseFloat(a.lagerwert)||0),0);
   const low=artikel.filter(a=>(parseInt(a.bestand)||0)<5).length;
-  const plats=new Set(artikel.flatMap(a=>(a.plattformen||'').split(',').map(p=>p.trim()).filter(Boolean)));
   document.getElementById('lTotal').textContent=total;
   document.getElementById('lWert').textContent=wert.toFixed(2).replace('.',',')+' €';
   document.getElementById('lLow').textContent=low;
-  document.getElementById('lPlat').textContent=plats.size;
+  document.getElementById('lFotos').textContent=savedPhotos.length;
 
   const c=document.getElementById('lagerContainer');
   if(!artikel.length){c.innerHTML='<div class="empty">📦 Noch keine Artikel. Generator benutzen!</div>';return;}
 
   let html=`<table class="ltbl"><thead><tr>
-    <th>SKU</th><th>Artikel</th><th>Kat.</th><th>EK</th><th>VK</th><th>Bestand</th><th>Plattformen</th><th>Aktionen</th>
+    <th>SKU</th><th>Artikel</th><th>Fotos</th><th>EK</th><th>VK</th><th>Bestand</th><th>Plattf.</th><th>Aktionen</th>
   </tr></thead><tbody>`;
+
   artikel.forEach((a,i)=>{
     const b=parseInt(a.bestand)||0;
     const sc=b===0?'sout':b<5?'slow':'sok';
     const si=b===0?'❌':b<5?'⚠️':'✅';
+    const thumbs=(a.fotos||[]).slice(0,3).map(u=>`<img src="${u}" onerror="this.style.display='none'">`).join('');
     html+=`<tr>
-      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);">${a.sku}</td>
-      <td><strong style="font-size:12px;">${a.name}</strong>${a.farben?`<br><span style="font-size:10px;color:var(--mut);">${a.farben}</span>`:''}</td>
-      <td><span class="bkat">${a.kategorie}</span></td>
-      <td style="font-size:12px;">${a.ek>0?(+a.ek).toFixed(2).replace('.',',')+' €':'—'}</td>
-      <td style="font-size:12px;">${a.vk>0?(+a.vk).toFixed(2).replace('.',',')+' €':'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);">${a.sku}</td>
+      <td><strong style="font-size:11px;">${a.name}</strong>${a.farben?`<br><span style="font-size:9px;color:var(--mut);">${a.farben}</span>`:''}</td>
+      <td><div class="thumb-row">${thumbs||'—'}</div></td>
+      <td style="font-size:11px;">${a.ek>0?(+a.ek).toFixed(2).replace('.',',')+' €':'—'}</td>
+      <td style="font-size:11px;">${a.vk>0?(+a.vk).toFixed(2).replace('.',',')+' €':'—'}</td>
       <td>
         <span class="${sc}">${si} ${b}</span><br>
-        <input type="number" value="${b}" min="0" style="width:55px;background:#1e1e1e;border:1px solid var(--brd);color:#fff;padding:3px 6px;font-size:11px;margin-top:3px;" onchange="updateB(${i},this.value)">
+        <input type="number" value="${b}" min="0" style="width:50px;background:#1e1e1e;border:1px solid var(--brd);color:#fff;padding:2px 5px;font-size:10px;margin-top:3px;" onchange="updateB(${i},this.value)">
       </td>
-      <td style="font-size:11px;color:var(--mut);">${a.plattformen||'—'}</td>
+      <td style="font-size:10px;color:var(--mut);">${a.plattformen||'—'}</td>
       <td style="white-space:nowrap;">
-        ${a.html?`<button onclick="cpHTML(${i})" style="background:var(--gold);color:#000;border:none;padding:4px 8px;font-size:9px;cursor:pointer;font-weight:700;margin-bottom:3px;display:block;width:100%;">HTML</button>`:''}
-        <button onclick="delA(${i})" style="background:var(--red);color:#fff;border:none;padding:4px 8px;font-size:9px;cursor:pointer;display:block;width:100%;">Löschen</button>
+        ${a.html?`<button onclick="cpHTML(${i})" style="background:var(--gold);color:#000;border:none;padding:3px 7px;font-size:9px;cursor:pointer;font-weight:700;margin-bottom:2px;display:block;width:100%;">HTML</button>`:''}
+        <button onclick="delA(${i})" style="background:var(--red);color:#fff;border:none;padding:3px 7px;font-size:9px;cursor:pointer;display:block;width:100%;">Del</button>
       </td>
     </tr>`;
   });
@@ -573,25 +1007,49 @@ async function updateB(i,val){
   artikel[i].bestand=parseInt(val)||0;
   artikel[i].lagerwert=((+artikel[i].ek||0)*artikel[i].bestand).toFixed(2);
   localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
-  // Sheets update
-  if(sheetsUrl && artikel[i].sku){
-    try{ await fetch(sheetsUrl,{method:'POST',body:JSON.stringify({action:'updateBestand',sku:artikel[i].sku,bestand:artikel[i].bestand})}); }catch(e){}
+  if(sheetsUrl&&artikel[i].sku){
+    try{await fetch(sheetsUrl,{method:'POST',body:JSON.stringify({action:'updateBestand',sku:artikel[i].sku,bestand:artikel[i].bestand})});}catch(e){}
   }
   renderLager();
 }
 
 function delA(i){
-  if(!confirm('Artikel wirklich löschen?')) return;
+  if(!confirm('Artikel löschen?'))return;
   const sku=artikel[i].sku;
   artikel.splice(i,1);
   localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
-  if(sheetsUrl && sku){ try{ fetch(sheetsUrl,{method:'POST',body:JSON.stringify({action:'delete',sku})}); }catch(e){} }
+  if(sheetsUrl&&sku){try{fetch(sheetsUrl,{method:'POST',body:JSON.stringify({action:'delete',sku})});}catch(e){}}
   renderLager();
 }
 
-function cpHTML(i){ navigator.clipboard.writeText(artikel[i].html).then(()=>alert('HTML kopiert!')); }
+function cpHTML(i){navigator.clipboard.writeText(artikel[i].html).then(()=>alert('HTML kopiert!'));}
 
-// EXPORT
+async function loadFromSheets(){
+  if(!sheetsUrl){alert('Google Sheets nicht verbunden!');return;}
+  try{
+    const res=await fetch(sheetsUrl+'?action=getAll');
+    const data=await res.json();
+    if(data.success&&data.artikel){
+      data.artikel.forEach(sa=>{
+        const local=artikel.find(a=>a.sku===sa['SKU']);
+        if(!local){
+          artikel.push({
+            sku:sa['SKU'],name:sa['Name'],kategorie:sa['Kategorie'],
+            beschreibung:sa['Beschreibung'],farben:sa['Farben'],
+            ek:sa['Einkauf'],vk:sa['Verkauf'],bestand:sa['Bestand'],
+            lagerwert:sa['Lagerwert'],plattformen:sa['Plattformen'],
+            einsatz:sa['Einsatz'],datum:sa['Datum'],fotos:[],html:''
+          });
+        }
+      });
+      localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
+      renderLager();
+      alert('✅ '+data.artikel.length+' Artikel geladen!');
+    }
+  }catch(e){alert('Fehler: '+e.message);}
+}
+
+// ===== EXPORT =====
 function updateExportStats(){
   const total=artikel.length;
   const wert=artikel.reduce((s,a)=>s+(parseFloat(a.lagerwert)||0),0);
@@ -611,35 +1069,123 @@ function exportExcel(typ){
   if(!data.length){alert('Keine Artikel für diesen Export!');return;}
 
   const rows=data.map(a=>({
-    'Artikelnummer (SKU)':a.sku,'Produktname':a.name,'Kategorie':a.kategorie,
-    'Beschreibung':a.beschreibung,'Farben / Varianten':a.farben||'',
-    'Einkaufspreis (€)':parseFloat(a.ek)||0,'Verkaufspreis (€)':parseFloat(a.vk)||0,
-    'Lagerbestand (Stk)':parseInt(a.bestand)||0,'Lagerwert (€)':parseFloat(a.lagerwert)||0,
-    'Plattformen':a.plattformen||'','Einsatzgebiete':a.einsatz||'',
+    'Artikel-Nr.':a.sku||'',
+    'EAN / Barcode':a.ean||'',
+    'Hersteller':a.hersteller||'',
+    'Marke':a.marke||'',
+    'Lieferant':a.lieferant||'',
+    'Artikelname':a.name||'',
+    'Kategorie':a.kategorie||'',
+    'Produktlinie':a.produktlinie||'',
+    'Einheit':a.einheit||'Stück',
+    'EK-Preis (€)':parseFloat(a.ek)||0,
+    'VK Hamburg (€)':parseFloat(a.vk_hh)||0,
+    'VK Online (€)':parseFloat(a.vk)||0,
+    'Onlineshop-Preis (€)':parseFloat(a.shopprice)||0,
+    'MwSt. (%)':a.mwst||'19',
+    'Marge (%)':a.vk>0&&a.ek>0?Math.round((a.vk-a.ek)/a.vk*100):0,
+    'Lagerbereich':a.lagerbereich||'',
+    'Lagerort':a.lagerort||'',
+    'Mindestbestand':parseInt(a.minbestand)||5,
+    'Aktueller Bestand':parseInt(a.bestand)||0,
+    'Lagerwert (€)':parseFloat(a.lagerwert)||0,
+    'Online aktiv':a.onlineaktiv||'Nein',
+    'Onlineshop-Preis (€)':parseFloat(a.shopprice)||0,
+    'Bild-Dateiname':a.bildname||'',
+    'Onlineshop-URL':a.shopurl||'',
+    'Plattformen':a.plattformen||'',
+    'Foto URLs':(a.fotos||[]).join(', '),
+    'Notizen':a.notizen||'',
     'Datum hinzugefügt':a.datum||''
   }));
 
   const ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[{wch:16},{wch:35},{wch:16},{wch:40},{wch:20},{wch:16},{wch:16},{wch:16},{wch:14},{wch:22},{wch:25},{wch:16}];
+  ws['!cols']=[{wch:12},{wch:30},{wch:14},{wch:35},{wch:16},{wch:14},{wch:14},{wch:12},{wch:12},{wch:20},{wch:22},{wch:50},{wch:14}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Lagerbestand');
 
   const sum=[
     ['XXL Friseur Shop – Lagerübersicht',''],
-    ['Erstellt am:',new Date().toLocaleDateString('de-DE')],
+    ['Erstellt:',new Date().toLocaleDateString('de-DE')],
     ['',''],
     ['Gesamt Artikel:',data.length],
     ['Gesamtwert:',data.reduce((s,a)=>s+(parseFloat(a.lagerwert)||0),0).toFixed(2)+' €'],
-    ['Niedriger Bestand (<5):',data.filter(a=>(parseInt(a.bestand)||0)<5).length],
+    ['Fotos gespeichert:',savedPhotos.length],
   ];
   const ws2=XLSX.utils.aoa_to_sheet(sum);
-  ws2['!cols']=[{wch:28},{wch:20}];
   XLSX.utils.book_append_sheet(wb,ws2,'Übersicht');
-
   XLSX.writeFile(wb,`XXL_Friseur_${typ}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-// HELPERS
+// ===== PDF KATALOG =====
+function generatePDF(){
+  if(!artikel.length){alert('Keine Artikel im Lager!');return;}
+  const title=document.getElementById('pdfTitle').value||'XXL Friseur Shop – Produktkatalog';
+  const datum=new Date().toLocaleDateString('de-DE');
+
+  let products='';
+  artikel.forEach(a=>{
+    const foto=a.fotos&&a.fotos[0]?`<img src="${a.fotos[0]}" style="width:100%;height:140px;object-fit:cover;margin-bottom:10px;border:1px solid #e2ddd6;">`:'<div style="width:100%;height:140px;background:#f0ede8;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:32px;">🛒</div>';
+    products+=`
+    <div style="border:1px solid #e2ddd6;padding:16px;break-inside:avoid;">
+      ${foto}
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#b8963e;margin-bottom:4px;">${a.kategorie}</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;">${a.name}</div>
+      ${a.farben?`<div style="font-size:11px;color:#666;margin-bottom:4px;">Farben: ${a.farben}</div>`:''}
+      <div style="font-size:11px;color:#666;line-height:1.5;margin-bottom:8px;">${a.beschreibung}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2ddd6;padding-top:8px;">
+        <span style="font-size:10px;color:#999;">SKU: ${a.sku}</span>
+        ${a.vk>0?`<span style="font-size:15px;font-weight:700;color:#b8963e;">${(+a.vk).toFixed(2).replace('.',',')} €</span>`:''}
+      </div>
+    </div>`;
+  });
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;padding:0;color:#333;}
+    @media print{.no-print{display:none!important;} body{-webkit-print-color-adjust:exact;}}
+  </style></head><body>
+  <div class="no-print" style="background:#0f0f0f;color:#e8d5a3;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-weight:700;">XXL Friseur Shop – PDF Katalog Vorschau</span>
+    <button onclick="window.print()" style="background:#c9a84c;color:#000;border:none;padding:8px 20px;font-weight:700;cursor:pointer;">🖨️ Als PDF speichern</button>
+  </div>
+  <div style="padding:32px;">
+    <div style="background:#0f0f0f;color:#e8d5a3;padding:20px 32px;margin:-32px -32px 32px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:2px;">XXL Friseur Shop</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:2px;margin-top:2px;">Professioneller Friseurbedarf</div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:rgba(255,255,255,0.4);">${title}<br>${datum}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">${products}</div>
+    <div style="margin-top:32px;padding-top:16px;border-top:2px solid #c9a84c;text-align:center;font-size:11px;color:#999;">
+      © XXL Friseur Shop · Alle Preise inkl. MwSt. · Stand: ${datum}
+    </div>
+  </div></body></html>`;
+
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ===== SETUP =====
+async function saveUrl(){
+  const url=document.getElementById('sheetsUrl').value.trim();
+  if(!url){alert('URL eingeben!');return;}
+  setStatus('setupStatus',true,'Verbindung testen...','load');
+  try{
+    const res=await fetch(url+'?action=stats');
+    const data=await res.json();
+    if(data.success){
+      sheetsUrl=url;
+      localStorage.setItem('xxl_sheets_url',url);
+      setStatus('setupStatus',true,'✅ Google Sheets verbunden!','ok');
+      updateStatusBars();
+    } else throw new Error(data.error||'Fehler');
+  }catch(e){setStatus('setupStatus',true,'❌ Fehler: '+e.message,'err');}
+}
+
+// ===== HELPERS =====
 function copyCode(){
   navigator.clipboard.writeText(document.getElementById('codeBox').textContent).then(()=>{
     const b=document.getElementById('cpBtn');
@@ -647,20 +1193,20 @@ function copyCode(){
     setTimeout(()=>{b.textContent='📋 Kopieren';b.classList.remove('copied');},2500);
   });
 }
-
 function dlHTML(){
   const code=document.getElementById('codeBox').textContent;
-  const name=document.getElementById('pname').value.trim().replace(/\s+/g,'_')||'ebay_auktion';
+  const name=document.getElementById('pname').value.trim().replace(/\s+/g,'_')||'ebay';
   const blob=new Blob([code],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`ebay_${name}.html`;a.click();
   URL.revokeObjectURL(url);
 }
-
 function resetForm(){
-  ['pname','pfarben','pek','pvk','pbestand','psku','pminbestand','pbeschreibung','pdetails','pvorteile','a1n','a1l','a2n','a2l','a3n','a3l'].forEach(id=>{
+  ['pname','pfarben','pek','pvk','pvk_hh','pbestand','psku','pbeschreibung','pdetails','pvorteile','pean','phersteller','pmarke','plieferant','pproduktlinie','pshopprice','plagerort','pbildname','pshopurl','pnotizen','a1n','a1l','a2n','a2l','a3n','a3l'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
+  selectedPhotos=[];
+  renderFotoAuswahl();
 }
 </script>
 </body>
