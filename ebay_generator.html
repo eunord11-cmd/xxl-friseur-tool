@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eBay Generator + Google Sheets – XXL Friseur Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0a0a0a;--sf:#141414;--sf2:#1e1e1e;--gold:#c9a84c;--gold2:#e8d5a3;--brd:rgba(201,168,76,0.2);--txt:#fff;--mut:rgba(255,255,255,0.45);--grn:#4caf7d;--red:#e05252;--blu:#4c9af7;}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:36px 20px;}
+.wrap{max-width:940px;margin:0 auto;}
+.header{text-align:center;margin-bottom:32px;}
+.badge{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);border:1px solid var(--brd);padding:4px 14px;margin-bottom:12px;text-transform:uppercase;}
+.header h1{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;line-height:1.15;margin-bottom:5px;}
+.header h1 span{color:var(--gold);}
+.header p{font-size:13px;color:var(--mut);}
+.tabs{display:flex;gap:2px;margin-bottom:18px;}
+.tab{flex:1;background:var(--sf2);border:1px solid var(--brd);padding:11px;text-align:center;cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);transition:all 0.2s;}
+.tab.active{background:var(--gold);color:#0a0a0a;border-color:var(--gold);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.card{background:var(--sf);border:1px solid var(--brd);padding:24px 28px;margin-bottom:16px;}
+.ct{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.ct::after{content:'';flex:1;height:1px;background:var(--brd);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;font-weight:500;}
+.inp{width:100%;background:var(--sf2);border:1px solid var(--brd);border-radius:2px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color 0.2s;}
+.inp:focus{border-color:var(--gold);}
+.inp::placeholder{color:rgba(255,255,255,0.18);}
+textarea.inp{resize:vertical;min-height:68px;line-height:1.6;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.r4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:9px;}
+.chk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.chk{background:var(--sf2);border:1px solid var(--brd);padding:8px 11px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:7px;}
+.chk:hover{border-color:var(--gold);}
+.chk.on{background:rgba(201,168,76,0.1);border-color:var(--gold);}
+.chk-dot{width:11px;height:11px;border:1px solid var(--brd);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;}
+.chk.on .chk-dot{background:var(--gold);border-color:var(--gold);color:#000;}
+.chk-lbl{font-size:12px;}
+.btn{width:100%;border:none;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.btn-gold{background:var(--gold);color:#0a0a0a;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-gold:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-grn{background:var(--grn);color:#fff;}
+.btn-grn:hover{background:#3d9e6b;}
+.btn-blu{background:var(--blu);color:#fff;}
+.btn-blu:hover{background:#3a88e0;}
+.btn-out{background:transparent;border:1px solid var(--brd);color:var(--gold2);}
+.btn-out:hover{background:var(--gold);color:#0a0a0a;border-color:var(--gold);}
+.btn-red{background:var(--red);color:#fff;}
+.status{display:none;align-items:center;gap:10px;padding:11px 15px;border-radius:2px;margin-top:10px;font-size:13px;}
+.status.show{display:flex;}
+.status.load{background:rgba(201,168,76,0.07);border:1px solid var(--brd);color:var(--gold2);}
+.status.err{background:rgba(224,82,82,0.07);border:1px solid rgba(224,82,82,0.3);color:var(--red);}
+.status.ok{background:rgba(76,175,125,0.07);border:1px solid rgba(76,175,125,0.3);color:var(--grn);}
+.spinner{width:14px;height:14px;border:2px solid var(--brd);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.result-card{background:var(--sf);border:1px solid rgba(76,175,125,0.4);padding:24px 28px;margin-top:16px;display:none;}
+.rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px;}
+.rt{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--grn);}
+.cp-btn{background:var(--gold);color:#0a0a0a;border:none;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 15px;cursor:pointer;border-radius:2px;transition:all 0.2s;}
+.cp-btn:hover{background:var(--gold2);}
+.cp-btn.copied{background:var(--grn);color:#fff;}
+.code-box{background:#0a0a0a;border:1px solid rgba(255,255,255,0.06);padding:13px;font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6;max-height:240px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;}
+/* SHEETS SETUP */
+.setup-steps{counter-reset:step;}
+.setup-step{counter-increment:step;display:grid;grid-template-columns:40px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.setup-step:last-child{border-bottom:none;}
+.step-n{width:36px;height:36px;background:var(--gold);color:#0a0a0a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;flex-shrink:0;}
+.step-body{}
+.step-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.step-desc{font-size:12px;color:var(--mut);line-height:1.6;}
+.step-code{background:var(--sf2);border:1px solid var(--brd);padding:8px 12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--gold2);margin-top:8px;word-break:break-all;}
+/* LAGER */
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.info-box{background:var(--sf2);border:1px solid var(--brd);padding:14px 12px;text-align:center;}
+.info-num{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);line-height:1;}
+.info-lbl{font-size:10px;color:var(--mut);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+.ltbl{width:100%;border-collapse:collapse;font-size:12px;}
+.ltbl th{background:var(--sf2);color:var(--gold);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:9px 11px;text-align:left;border-bottom:1px solid var(--brd);}
+.ltbl td{padding:9px 11px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+.ltbl tr:hover td{background:rgba(255,255,255,0.02);}
+.bkat{font-size:10px;background:rgba(201,168,76,0.15);color:var(--gold);padding:2px 7px;border-radius:2px;}
+.sok{color:var(--grn);font-weight:600;}
+.slow{color:#f0a040;font-weight:600;}
+.sout{color:var(--red);font-weight:600;}
+.empty{text-align:center;padding:40px;color:var(--mut);}
+/* SHEETS CONNECTED */
+.sheets-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:2px;font-size:12px;margin-bottom:14px;}
+.sheets-connected{background:rgba(76,175,125,0.1);border:1px solid rgba(76,175,125,0.3);color:var(--grn);}
+.sheets-disconnected{background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.25);color:var(--red);}
+@media(max-width:600px){
+  .r2,.r3,.r4{grid-template-columns:1fr;}
+  .chk-grid{grid-template-columns:1fr 1fr;}
+  .tabs{flex-direction:column;}
+  .info-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="badge">XXL Friseur Shop · Tools</div>
+  <h1>eBay Generator + <span>Google Sheets</span></h1>
+  <p>Artikel anlegen → HTML generieren → Lager in Google Sheets speichern → Excel exportieren</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('gen')">⚡ Generator</div>
+  <div class="tab" onclick="showTab('lager')">📦 Lager</div>
+  <div class="tab" onclick="showTab('export')">📊 Export</div>
+  <div class="tab" onclick="showTab('setup')">⚙️ Einrichtung</div>
+</div>
+
+<!-- ===== GENERATOR ===== -->
+<div class="tab-content active" id="tab-gen">
+
+<div id="sheetsStatusBar"></div>
+
+<div class="card">
+  <div class="ct">Produktinformationen</div>
+
+  <div class="field">
+    <label>Produktname *</label>
+    <input class="inp" id="pname" placeholder="z.B. Profi Halskrause Friseur 500 Blatt">
+  </div>
+  <div class="r2">
+    <div class="field">
+      <label>Kategorie</label>
+      <select class="inp" id="pkat">
+        <option>Friseurbedarf</option><option>Barbershop</option>
+        <option>Salon Zubehör</option><option>Haarpflege</option><option>Hygiene</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Farben / Varianten</label>
+      <input class="inp" id="pfarben" placeholder="z.B. Silber & Gold">
+    </div>
+  </div>
+  <div class="r3">
+    <div class="field">
+      <label>Einkaufspreis (€)</label>
+      <input class="inp" type="number" id="pek" placeholder="0.00" step="0.01">
+    </div>
+    <div class="field">
+      <label>Verkaufspreis (€)</label>
+      <input class="inp" type="number" id="pvk" placeholder="0.00" step="0.01">
+    </div>
+    <div class="field">
+      <label>Anfangsbestand</label>
+      <input class="inp" type="number" id="pbestand" placeholder="0">
+    </div>
+  </div>
+  <div class="r2">
+    <div class="field">
+      <label>Artikelnummer (SKU)</label>
+      <input class="inp" id="psku" placeholder="Wird automatisch vergeben">
+    </div>
+    <div class="field">
+      <label>Mindestbestand (Warnung bei)</label>
+      <input class="inp" type="number" id="pminbestand" placeholder="5">
+    </div>
+  </div>
+  <div class="field">
+    <label>Kurzbeschreibung *</label>
+    <textarea class="inp" id="pbeschreibung" placeholder="z.B. Professionelle Einweg-Halskrause für Friseure..."></textarea>
+  </div>
+  <div class="field">
+    <label>Technische Details (je Zeile ein Detail)</label>
+    <textarea class="inp" id="pdetails" placeholder="Inhalt: 5 Rollen · 500 Blatt&#10;Material: Krepppapier&#10;Farbe: Weiß"></textarea>
+  </div>
+  <div class="field">
+    <label>Produktvorteile (je Zeile)</label>
+    <textarea class="inp" id="pvorteile" placeholder="Nassfest & hochdehnbar&#10;Selbstklebend – sitzt sicher"></textarea>
+  </div>
+  <div class="field">
+    <label>Einsatzgebiete</label>
+    <div class="chk-grid" id="einsatzGrid">
+      <div class="chk on" onclick="toggleChk(this)"><div class="chk-dot">✓</div><span class="chk-lbl">Friseursalon</span></div>
+      <div class="chk on" onclick="toggleChk(this)"><div class="chk-dot">✓</div><span class="chk-lbl">Barbershop</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Heimgebrauch</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Haare färben</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Styling</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Rasur</span></div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Plattformen</label>
+    <div class="r4">
+      <div class="chk on" onclick="toggleChk(this)"><div class="chk-dot">✓</div><span class="chk-lbl">eBay</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Amazon</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Etsy</span></div>
+      <div class="chk" onclick="toggleChk(this)"><div class="chk-dot"></div><span class="chk-lbl">Webshop</span></div>
+    </div>
+  </div>
+  <div class="field">
+    <label>🛍️ Weitere eBay-Artikel verlinken (optional)</label>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+      <div class="r2">
+        <input class="inp" id="a1n" placeholder="Artikel 1 Name" style="font-size:12px;padding:8px 11px;">
+        <input class="inp" id="a1l" placeholder="https://www.ebay.de/itm/..." style="font-size:12px;padding:8px 11px;">
+      </div>
+      <div class="r2">
+        <input class="inp" id="a2n" placeholder="Artikel 2 Name" style="font-size:12px;padding:8px 11px;">
+        <input class="inp" id="a2l" placeholder="https://www.ebay.de/itm/..." style="font-size:12px;padding:8px 11px;">
+      </div>
+      <div class="r2">
+        <input class="inp" id="a3n" placeholder="Artikel 3 Name" style="font-size:12px;padding:8px 11px;">
+        <input class="inp" id="a3l" placeholder="https://www.ebay.de/itm/..." style="font-size:12px;padding:8px 11px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="r2" style="margin-top:6px;">
+    <button class="btn btn-gold" id="genBtn" onclick="generateAll()">⚡ GENERIEREN + SPEICHERN</button>
+    <button class="btn btn-out" onclick="resetForm()">↺ Leeren</button>
+  </div>
+  <div class="status" id="genStatus"><div class="spinner"></div><span id="genStatusTxt"></span></div>
+</div>
+
+<div class="result-card" id="resultCard">
+  <div class="rh">
+    <span class="rt">✅ Fertiger eBay HTML-Code</span>
+    <button class="cp-btn" id="cpBtn" onclick="copyCode()">📋 Kopieren</button>
+  </div>
+  <div class="code-box" id="codeBox"></div>
+  <div class="r2" style="margin-top:9px;">
+    <button class="btn btn-out" onclick="dlHTML()">⬇ HTML herunterladen</button>
+    <button class="btn btn-grn" onclick="showTab('lager')">📦 Zum Lager →</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== LAGER ===== -->
+<div class="tab-content" id="tab-lager">
+<div class="card">
+  <div class="ct">Lagerübersicht</div>
+  <div id="sheetsStatusLager"></div>
+  <div class="info-grid">
+    <div class="info-box"><div class="info-num" id="lTotal">0</div><div class="info-lbl">Artikel</div></div>
+    <div class="info-box"><div class="info-num" id="lWert" style="font-size:16px;">0,00 €</div><div class="info-lbl">Lagerwert</div></div>
+    <div class="info-box"><div class="info-num" id="lLow" style="color:var(--red);">0</div><div class="info-lbl">Niedriger Bestand</div></div>
+    <div class="info-box"><div class="info-num" id="lPlat">0</div><div class="info-lbl">Plattformen</div></div>
+  </div>
+  <button class="btn btn-blu" style="margin-bottom:14px;" onclick="loadFromSheets()">🔄 Von Google Sheets laden</button>
+  <div id="lagerContainer"><div class="empty">📦 Noch keine Artikel. Gehe zum Generator!</div></div>
+</div>
+</div>
+
+<!-- ===== EXPORT ===== -->
+<div class="tab-content" id="tab-export">
+<div class="card">
+  <div class="ct">Excel Export</div>
+  <div class="info-grid">
+    <div class="info-box"><div class="info-num" id="eTotal">0</div><div class="info-lbl">Artikel</div></div>
+    <div class="info-box"><div class="info-num" id="eWert" style="font-size:16px;">0,00 €</div><div class="info-lbl">Gesamtwert</div></div>
+    <div class="info-box"><div class="info-num" id="ePlat">0</div><div class="info-lbl">Plattformen</div></div>
+    <div class="info-box"><div class="info-num" id="eLow" style="color:var(--red);">0</div><div class="info-lbl">Niedriger Bestand</div></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:9px;">
+    <button class="btn btn-grn" onclick="exportExcel('alle')">📊 Komplette Lagerliste</button>
+    <button class="btn btn-blu" onclick="exportExcel('ebay')">🛒 Nur eBay-Artikel</button>
+    <button class="btn btn-blu" onclick="exportExcel('amazon')">📦 Nur Amazon-Artikel</button>
+    <button class="btn btn-out" onclick="exportExcel('low')">⚠️ Niedriger Bestand</button>
+  </div>
+  <div style="margin-top:18px;padding:14px;background:var(--sf2);border:1px solid var(--brd);">
+    <p style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Excel Spalten:</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+      <span style="font-size:11px;color:var(--mut);">✓ SKU / Artikelnummer</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Produktname</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Kategorie</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Beschreibung</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Farben / Varianten</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Einkaufspreis</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Verkaufspreis</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Lagerbestand</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Lagerwert</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Plattformen</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Einsatzgebiete</span>
+      <span style="font-size:11px;color:var(--mut);">✓ Datum</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SETUP ===== -->
+<div class="tab-content" id="tab-setup">
+<div class="card">
+  <div class="ct">Google Sheets Einrichtung</div>
+  <p style="font-size:13px;color:var(--mut);margin-bottom:20px;line-height:1.7;">Einmalige Einrichtung — danach werden alle Artikel automatisch in Google Sheets gespeichert und sind von überall abrufbar.</p>
+
+  <div class="setup-steps">
+    <div class="setup-step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <div class="step-title">Google Sheet erstellen</div>
+        <div class="step-desc">Gehe auf <strong>sheets.google.com</strong> → Neues leeres Sheet → Nenne es <strong>„XXL Friseur Lager"</strong></div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <div class="step-title">Apps Script öffnen</div>
+        <div class="step-desc">Im Sheet: <strong>Erweiterungen → Apps Script</strong> → Das Script-Fenster öffnet sich</div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <div class="step-title">Script einfügen</div>
+        <div class="step-desc">Den gesamten Inhalt der Datei <strong>google_apps_script.js</strong> in das Script-Fenster kopieren → Alten Code löschen → Speichern (💾)</div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <div class="step-title">Web-App veröffentlichen</div>
+        <div class="step-desc">
+          1. Oben rechts: <strong>Bereitstellen → Neue Bereitstellung</strong><br>
+          2. Typ: <strong>Web-App</strong><br>
+          3. Ausführen als: <strong>Ich (deine E-Mail)</strong><br>
+          4. Zugriff: <strong>Jeder</strong><br>
+          5. <strong>Bereitstellen</strong> → Berechtigung erteilen → URL kopieren
+        </div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div class="step-n">5</div>
+      <div class="step-body">
+        <div class="step-title">URL hier eintragen</div>
+        <div class="step-desc">Die Web-App URL unten einfügen → Verbinden klicken → Fertig!</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input class="inp" id="sheetsUrl" placeholder="https://script.google.com/macros/s/..." style="flex:1;">
+          <button class="btn btn-grn" style="width:auto;padding:10px 18px;margin:0;" onclick="saveUrl()">✓ Verbinden</button>
+        </div>
+        <div class="status" id="setupStatus"><div class="spinner"></div><span id="setupStatusTxt"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+<script>
+// STATE
+let artikel = [];
+let skuN = parseInt(localStorage.getItem('xxl_sku')||'1');
+let sheetsUrl = localStorage.getItem('xxl_sheets_url')||'';
+
+// INIT
+window.onload = () => {
+  if(sheetsUrl) document.getElementById('sheetsUrl').value = sheetsUrl;
+  updateStatusBars();
+  artikel = JSON.parse(localStorage.getItem('xxl_artikel')||'[]');
+  renderLager();
+  updateExportStats();
+};
+
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  ['gen','lager','export','setup'].forEach((t,i)=>{ if(t===id) document.querySelectorAll('.tab')[i].classList.add('active'); });
+  if(id==='lager'){renderLager();updateExportStats();}
+  if(id==='export') updateExportStats();
+  updateStatusBars();
+}
+
+function updateStatusBars() {
+  const html = sheetsUrl
+    ? `<div class="sheets-status sheets-connected">✅ Google Sheets verbunden — Daten werden automatisch gespeichert</div>`
+    : `<div class="sheets-status sheets-disconnected">⚠️ Google Sheets nicht verbunden — Gehe zu ⚙️ Einrichtung → URL eintragen</div>`;
+  ['sheetsStatusBar','sheetsStatusLager'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
+}
+
+// CHECKBOXES
+function toggleChk(el){el.classList.toggle('on');el.querySelector('.chk-dot').textContent=el.classList.contains('on')?'✓':'';}
+function getChk(gridId){return Array.from(document.querySelectorAll('#'+gridId+' .chk.on')).map(i=>i.querySelector('.chk-lbl').textContent);}
+
+// STATUS
+function setStatus(id,show,text,type='load'){
+  const el=document.getElementById(id);
+  el.className='status'+(show?' show '+type:'');
+  el.querySelector('span').textContent=text||'';
+}
+
+// SAVE URL
+async function saveUrl(){
+  const url=document.getElementById('sheetsUrl').value.trim();
+  if(!url){alert('Bitte URL eingeben!');return;}
+  setStatus('setupStatus',true,'Verbindung wird getestet...','load');
+  try{
+    const res=await fetch(url+'?action=stats');
+    const data=await res.json();
+    if(data.success){
+      sheetsUrl=url;
+      localStorage.setItem('xxl_sheets_url',url);
+      setStatus('setupStatus',true,'✅ Verbindung erfolgreich! Google Sheets ist verbunden.','ok');
+      updateStatusBars();
+    } else throw new Error(data.error||'Verbindung fehlgeschlagen');
+  }catch(e){setStatus('setupStatus',true,'❌ Fehler: '+e.message+' — Bitte URL prüfen','err');}
+}
+
+// GENERATE
+async function generateAll(){
+  const name=document.getElementById('pname').value.trim();
+  const beschreibung=document.getElementById('pbeschreibung').value.trim();
+  if(!name||!beschreibung){alert('Bitte Produktname und Beschreibung ausfüllen!');return;}
+
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  setStatus('genStatus',true,'KI generiert HTML-Code...','load');
+  document.getElementById('resultCard').style.display='none';
+
+  const kat=document.getElementById('pkat').value;
+  const farben=document.getElementById('pfarben').value.trim();
+  const details=document.getElementById('pdetails').value.trim();
+  const vorteile=document.getElementById('pvorteile').value.trim();
+  const einsatz=getChk('einsatzGrid');
+  const plattformen=getChk('platGrid')||[];
+  const ek=parseFloat(document.getElementById('pek').value)||0;
+  const vk=parseFloat(document.getElementById('pvk').value)||0;
+  const bestand=parseInt(document.getElementById('pbestand').value)||0;
+  let sku=document.getElementById('psku').value.trim()||('XXL-'+String(skuN++).padStart(3,'0'));
+  localStorage.setItem('xxl_sku',skuN);
+
+  const weitere=[];
+  ['1','2','3'].forEach(n=>{
+    const an=document.getElementById('a'+n+'n').value.trim();
+    const al=document.getElementById('a'+n+'l').value.trim();
+    if(an&&al) weitere.push(`- ${an}: ${al}`);
+  });
+
+  const prompt=`Erstelle professionellen eBay-HTML-Code:
+Produkt: ${name} | Kategorie: ${kat}${farben?` | Farben: ${farben}`:''}
+Beschreibung: ${beschreibung}
+${details?`Details:\n${details}`:''}
+${vorteile?`Vorteile:\n${vorteile}`:''}
+${einsatz.length?`Einsatz: ${einsatz.join(', ')}`:''}
+${weitere.length?`Weitere Artikel:\n${weitere.join('\n')}`:''}
+ANFORDERUNGEN: Nur HTML-Tabellen + inline CSS. Farben: #0f0f0f #b8963e #fdfcfa. Shop: "XXL Friseur Shop". Aufbau: Header→Hero→Vorteile(01-06)→Details→Einsatz→Versandinfo${weitere.length?'→Weitere Artikel Karten mit echten Links':''} →Footer. KEINE Bilder, KEIN Preis. Max 20000 Zeichen. Nur HTML, keine Erklärung.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    let code=data.content?.[0]?.text||'';
+    code=code.replace(/```html\n?/gi,'').replace(/```\n?/gi,'').trim();
+    if(!code||code.length<100) throw new Error('Kein Code generiert');
+
+    document.getElementById('codeBox').textContent=code;
+    document.getElementById('resultCard').style.display='block';
+    document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
+
+    // Artikel Objekt
+    const a={
+      id:Date.now(), sku, name, kategorie:kat, beschreibung, farben,
+      details, vorteile, einsatz:einsatz.join(', '),
+      plattformen:plattformen.join(', '),
+      ek, vk, bestand,
+      lagerwert:(ek*bestand).toFixed(2),
+      datum:new Date().toLocaleDateString('de-DE'),
+      html:code
+    };
+
+    // Lokal speichern
+    artikel.push(a);
+    localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
+
+    // In Google Sheets speichern
+    if(sheetsUrl){
+      setStatus('genStatus',true,'In Google Sheets speichern...','load');
+      try{
+        await fetch(sheetsUrl,{
+          method:'POST',
+          body:JSON.stringify({action:'add',sku,name,kategorie:kat,beschreibung,farben,
+            einkauf:ek,verkauf:vk,bestand,lagerwert:a.lagerwert,
+            plattformen:plattformen.join(', '),einsatz:einsatz.join(', ')})
+        });
+        setStatus('genStatus',true,'✅ HTML generiert + in Google Sheets gespeichert!','ok');
+      }catch(e){
+        setStatus('genStatus',true,'✅ HTML generiert · ⚠️ Sheets-Fehler: '+e.message,'ok');
+      }
+    } else {
+      setStatus('genStatus',true,'✅ HTML generiert + lokal gespeichert (Sheets nicht verbunden)','ok');
+    }
+
+  }catch(e){setStatus('genStatus',true,'❌ Fehler: '+e.message,'err');}
+  btn.disabled=false;
+}
+
+// LOAD FROM SHEETS
+async function loadFromSheets(){
+  if(!sheetsUrl){alert('Google Sheets nicht verbunden! Gehe zu ⚙️ Einrichtung.');return;}
+  try{
+    const res=await fetch(sheetsUrl+'?action=getAll');
+    const data=await res.json();
+    if(data.success && data.artikel){
+      // Merge mit lokalen HTML-Daten
+      data.artikel.forEach(sa=>{
+        const local=artikel.find(a=>a.sku===sa['Artikelnummer (SKU)']);
+        if(!local){
+          artikel.push({
+            sku:sa['Artikelnummer (SKU)'],name:sa['Produktname'],
+            kategorie:sa['Kategorie'],beschreibung:sa['Beschreibung'],
+            farben:sa['Farben / Varianten'],ek:sa['Einkaufspreis (€)'],
+            vk:sa['Verkaufspreis (€)'],bestand:sa['Lagerbestand (Stk)'],
+            lagerwert:sa['Lagerwert (€)'],plattformen:sa['Plattformen'],
+            einsatz:sa['Einsatzgebiete'],datum:sa['Datum hinzugefügt'],html:''
+          });
+        } else {
+          local.bestand=sa['Lagerbestand (Stk)'];
+          local.lagerwert=sa['Lagerwert (€)'];
+        }
+      });
+      localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
+      renderLager();
+      alert('✅ '+data.artikel.length+' Artikel von Google Sheets geladen!');
+    }
+  }catch(e){alert('Fehler beim Laden: '+e.message);}
+}
+
+// RENDER LAGER
+function renderLager(){
+  const total=artikel.length;
+  const wert=artikel.reduce((s,a)=>s+(parseFloat(a.lagerwert)||0),0);
+  const low=artikel.filter(a=>(parseInt(a.bestand)||0)<5).length;
+  const plats=new Set(artikel.flatMap(a=>(a.plattformen||'').split(',').map(p=>p.trim()).filter(Boolean)));
+  document.getElementById('lTotal').textContent=total;
+  document.getElementById('lWert').textContent=wert.toFixed(2).replace('.',',')+' €';
+  document.getElementById('lLow').textContent=low;
+  document.getElementById('lPlat').textContent=plats.size;
+
+  const c=document.getElementById('lagerContainer');
+  if(!artikel.length){c.innerHTML='<div class="empty">📦 Noch keine Artikel. Generator benutzen!</div>';return;}
+
+  let html=`<table class="ltbl"><thead><tr>
+    <th>SKU</th><th>Artikel</th><th>Kat.</th><th>EK</th><th>VK</th><th>Bestand</th><th>Plattformen</th><th>Aktionen</th>
+  </tr></thead><tbody>`;
+  artikel.forEach((a,i)=>{
+    const b=parseInt(a.bestand)||0;
+    const sc=b===0?'sout':b<5?'slow':'sok';
+    const si=b===0?'❌':b<5?'⚠️':'✅';
+    html+=`<tr>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);">${a.sku}</td>
+      <td><strong style="font-size:12px;">${a.name}</strong>${a.farben?`<br><span style="font-size:10px;color:var(--mut);">${a.farben}</span>`:''}</td>
+      <td><span class="bkat">${a.kategorie}</span></td>
+      <td style="font-size:12px;">${a.ek>0?(+a.ek).toFixed(2).replace('.',',')+' €':'—'}</td>
+      <td style="font-size:12px;">${a.vk>0?(+a.vk).toFixed(2).replace('.',',')+' €':'—'}</td>
+      <td>
+        <span class="${sc}">${si} ${b}</span><br>
+        <input type="number" value="${b}" min="0" style="width:55px;background:#1e1e1e;border:1px solid var(--brd);color:#fff;padding:3px 6px;font-size:11px;margin-top:3px;" onchange="updateB(${i},this.value)">
+      </td>
+      <td style="font-size:11px;color:var(--mut);">${a.plattformen||'—'}</td>
+      <td style="white-space:nowrap;">
+        ${a.html?`<button onclick="cpHTML(${i})" style="background:var(--gold);color:#000;border:none;padding:4px 8px;font-size:9px;cursor:pointer;font-weight:700;margin-bottom:3px;display:block;width:100%;">HTML</button>`:''}
+        <button onclick="delA(${i})" style="background:var(--red);color:#fff;border:none;padding:4px 8px;font-size:9px;cursor:pointer;display:block;width:100%;">Löschen</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  c.innerHTML=html;
+  updateExportStats();
+}
+
+async function updateB(i,val){
+  artikel[i].bestand=parseInt(val)||0;
+  artikel[i].lagerwert=((+artikel[i].ek||0)*artikel[i].bestand).toFixed(2);
+  localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
+  // Sheets update
+  if(sheetsUrl && artikel[i].sku){
+    try{ await fetch(sheetsUrl,{method:'POST',body:JSON.stringify({action:'updateBestand',sku:artikel[i].sku,bestand:artikel[i].bestand})}); }catch(e){}
+  }
+  renderLager();
+}
+
+function delA(i){
+  if(!confirm('Artikel wirklich löschen?')) return;
+  const sku=artikel[i].sku;
+  artikel.splice(i,1);
+  localStorage.setItem('xxl_artikel',JSON.stringify(artikel));
+  if(sheetsUrl && sku){ try{ fetch(sheetsUrl,{method:'POST',body:JSON.stringify({action:'delete',sku})}); }catch(e){} }
+  renderLager();
+}
+
+function cpHTML(i){ navigator.clipboard.writeText(artikel[i].html).then(()=>alert('HTML kopiert!')); }
+
+// EXPORT
+function updateExportStats(){
+  const total=artikel.length;
+  const wert=artikel.reduce((s,a)=>s+(parseFloat(a.lagerwert)||0),0);
+  const plats=new Set(artikel.flatMap(a=>(a.plattformen||'').split(',').map(p=>p.trim()).filter(Boolean)));
+  const low=artikel.filter(a=>(parseInt(a.bestand)||0)<5).length;
+  document.getElementById('eTotal').textContent=total;
+  document.getElementById('eWert').textContent=wert.toFixed(2).replace('.',',')+' €';
+  document.getElementById('ePlat').textContent=plats.size;
+  document.getElementById('eLow').textContent=low;
+}
+
+function exportExcel(typ){
+  let data=[...artikel];
+  if(typ==='ebay') data=data.filter(a=>a.plattformen&&a.plattformen.includes('eBay'));
+  if(typ==='amazon') data=data.filter(a=>a.plattformen&&a.plattformen.includes('Amazon'));
+  if(typ==='low') data=data.filter(a=>(parseInt(a.bestand)||0)<5);
+  if(!data.length){alert('Keine Artikel für diesen Export!');return;}
+
+  const rows=data.map(a=>({
+    'Artikelnummer (SKU)':a.sku,'Produktname':a.name,'Kategorie':a.kategorie,
+    'Beschreibung':a.beschreibung,'Farben / Varianten':a.farben||'',
+    'Einkaufspreis (€)':parseFloat(a.ek)||0,'Verkaufspreis (€)':parseFloat(a.vk)||0,
+    'Lagerbestand (Stk)':parseInt(a.bestand)||0,'Lagerwert (€)':parseFloat(a.lagerwert)||0,
+    'Plattformen':a.plattformen||'','Einsatzgebiete':a.einsatz||'',
+    'Datum hinzugefügt':a.datum||''
+  }));
+
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:16},{wch:35},{wch:16},{wch:40},{wch:20},{wch:16},{wch:16},{wch:16},{wch:14},{wch:22},{wch:25},{wch:16}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Lagerbestand');
+
+  const sum=[
+    ['XXL Friseur Shop – Lagerübersicht',''],
+    ['Erstellt am:',new Date().toLocaleDateString('de-DE')],
+    ['',''],
+    ['Gesamt Artikel:',data.length],
+    ['Gesamtwert:',data.reduce((s,a)=>s+(parseFloat(a.lagerwert)||0),0).toFixed(2)+' €'],
+    ['Niedriger Bestand (<5):',data.filter(a=>(parseInt(a.bestand)||0)<5).length],
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(sum);
+  ws2['!cols']=[{wch:28},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Übersicht');
+
+  XLSX.writeFile(wb,`XXL_Friseur_${typ}_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// HELPERS
+function copyCode(){
+  navigator.clipboard.writeText(document.getElementById('codeBox').textContent).then(()=>{
+    const b=document.getElementById('cpBtn');
+    b.textContent='✅ Kopiert!';b.classList.add('copied');
+    setTimeout(()=>{b.textContent='📋 Kopieren';b.classList.remove('copied');},2500);
+  });
+}
+
+function dlHTML(){
+  const code=document.getElementById('codeBox').textContent;
+  const name=document.getElementById('pname').value.trim().replace(/\s+/g,'_')||'ebay_auktion';
+  const blob=new Blob([code],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`ebay_${name}.html`;a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetForm(){
+  ['pname','pfarben','pek','pvk','pbestand','psku','pminbestand','pbeschreibung','pdetails','pvorteile','a1n','a1l','a2n','a2l','a3n','a3l'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+}
+</script>
+</body>
+</html>
